@@ -1,0 +1,74 @@
+# Git ignore for a Spring Boot + Java + Maven project
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Compiled class files
+*.class
+
+# Log files
+*.log
+/logs/
+
+# Package archives
+*.jar
+*.war
+*.ear
+*.zip
+
+# Maven
+/target/
+/pom.xml.tag
+/pom.xml.releaseBackup
+/pom.xml.versionsBackup
+mvnw.cmd
+mvnw
+HELP.md
+
+# Eclipse
+.metadata/
+.classpath
+.project
+.settings/
+bin/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+out/
+
+# VS Code
+.vscode/
+
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+
+# Spring Boot devtools temporary files
+.springBeans
+
+# H2 database files (local file-based DB)
+*.mv.db
+*.trace.db
+*.h2.db
+/data/
+
+# OS editor swap files, temp
+*~
+*.swp
+
+# Environment files (may contain secrets)
+.env
+.env.*
+
+# JPA / generated sources (optional)
+/target/generated-sources/
+
+
