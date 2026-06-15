@@ -1,13 +1,16 @@
-package com.mba.fc.ingressos.core.domain.entities;
+package com.mba.fc.ingressos.core.events.domain.entities;
+
+import com.mba.fc.ingressos.core.common.domain.AggregateRoot;
 
 import java.util.UUID;
 
-public class Customer {
+public class Customer extends AggregateRoot {
     private final String id;
     private final String cpf;
     private final String name;
 
     public Customer(String id, String cpf, String name) {
+        super();
         this.id = id;
         this.cpf = cpf;
         this.name = name;
