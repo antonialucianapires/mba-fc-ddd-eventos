@@ -1,15 +1,16 @@
 package com.mba.fc.ingressos.core.events.domain.entities;
 
 import com.mba.fc.ingressos.core.common.domain.AggregateRoot;
+import com.mba.fc.ingressos.core.common.domain.valueobjects.CPF;
 
 import java.util.UUID;
 
 public class Customer extends AggregateRoot {
     private final String id;
-    private final String cpf;
+    private final CPF cpf;
     private final String name;
 
-    public Customer(String id, String cpf, String name) {
+    public Customer(String id, CPF cpf, String name) {
         super();
         this.id = id;
         this.cpf = cpf;
@@ -19,7 +20,7 @@ public class Customer extends AggregateRoot {
     public static Customer create(String cpf, String name) {
         return new Customer(
                 UUID.randomUUID().toString(),
-                cpf,
+                new CPF(cpf),
                 name
         );
     }
@@ -28,7 +29,7 @@ public class Customer extends AggregateRoot {
         return id;
     }
 
-    public String getCpf() {
+    public CPF getCpf() {
         return cpf;
     }
 
