@@ -1,18 +1,30 @@
 package com.mba.fc.ingressos.core.events.domain.entities;
 
 import com.mba.fc.ingressos.core.common.domain.AggregateRoot;
-import com.mba.fc.ingressos.core.common.domain.valueobjects.CPF;
+import com.mba.fc.ingressos.core.common.domain.valueobjects.Cpf;
+import com.mba.fc.ingressos.core.common.domain.valueobjects.CustomerId;
 
 import java.util.UUID;
 
-public class Customer extends AggregateRoot {
-    private final String id;
-    private final CPF cpf;
+public class Customer extends AggregateRoot<CustomerId> {
+
+    private final Cpf cpf;
     private final String name;
 
-    public Customer(String id, CPF cpf, String name) {
-        super();
-        this.id = id;
+    public Customer(Cpf cpf, String name) {
+        super(new CustomerId());
+        this.cpf = cpf;
+        this.name = name;
+    }
+
+    public Customer(String id, Cpf cpf, String name) {
+        super(new CustomerId(id));
+        this.cpf = cpf;
+        this.name = name;
+    }
+
+    public Customer(CustomerId id, Cpf cpf, String name) {
+        super(id);
         this.cpf = cpf;
         this.name = name;
     }
@@ -20,16 +32,16 @@ public class Customer extends AggregateRoot {
     public static Customer create(String cpf, String name) {
         return new Customer(
                 UUID.randomUUID().toString(),
-                new CPF(cpf),
+                new Cpf(cpf),
                 name
         );
     }
 
-    public String getId() {
+    public CustomerId getId() {
         return id;
     }
 
-    public CPF getCpf() {
+    public Cpf getCpf() {
         return cpf;
     }
 
@@ -39,7 +51,6 @@ public class Customer extends AggregateRoot {
 
     @Override
     public String toString() {
-        //CPF é PII (Personally Identifiable Information). Se aparecer em log, viola LGPD.
-        return "Customer{id=" + id + ", name=" + name + "}";
+        return "Customer{id=" + id.getValue() + ", name=" + name + "}";
     }
 }

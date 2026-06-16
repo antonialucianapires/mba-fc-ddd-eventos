@@ -2,10 +2,10 @@ package com.mba.fc.ingressos.core.common.domain.valueobjects;
 
 import com.mba.fc.ingressos.core.common.domain.ValueObject;
 
-public class CPF extends ValueObject<String> {
+public class Cpf extends ValueObject<String> {
 
-    public CPF(String value) {
-        super(value.replaceAll("\\D", "")); // remove tudo que não é dígito
+    public Cpf(String value) {
+        super(value == null ? null : value.replaceAll("\\D", ""));
         this.validate();
     }
 
