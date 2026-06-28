@@ -1,12 +1,17 @@
 package com.mba.fc.ingressos.core.events.domain.entities;
 
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventId;
+import com.mba.fc.ingressos.core.common.domain.valueobjects.EventSectionId;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.PartnerId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -69,6 +74,32 @@ class EventTest {
             assertEquals(10, event.getTotalSpotsReserved());
             assertSame(VALID_PARTNER_ID, event.getPartnerId());
         }
+
+        @Test
+        @DisplayName("should start with empty sections when none are provided")
+        void shouldStartWithEmptySections() {
+            Event event = new Event(VALID_NAME, VALID_DESCRIPTION, VALID_DATE, false,
+                    VALID_TOTAL_SPOTS, 0, VALID_PARTNER_ID);
+
+            assertTrue(event.getSections().isEmpty());
+        }
+
+        @Test
+        @DisplayName("should copy provided sections into the event")
+        void shouldCopyProvidedSections() {
+            EventSection s1 = EventSection.create("Pista", "Descrição", 100, new BigDecimal("50.00"));
+            EventSection s2 = EventSection.create("VIP", "Descrição VIP", 50, new BigDecimal("200.00"));
+            Set<EventSection> sections = new LinkedHashSet<>();
+            sections.add(s1);
+            sections.add(s2);
+
+            Event event = new Event(VALID_NAME, VALID_DESCRIPTION, VALID_DATE, false,
+                    VALID_TOTAL_SPOTS, 0, VALID_PARTNER_ID, sections);
+
+            assertEquals(2, event.getSections().size());
+            assertTrue(event.getSections().contains(s1));
+            assertTrue(event.getSections().contains(s2));
+        }
     }
 
     @Nested
@@ -125,6 +156,68 @@ class EventTest {
                     VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
 
             assertNotEquals(a.getId().getValue(), b.getId().getValue());
+        }
+
+        @Test
+        @DisplayName("should create an event with empty sections")
+        void shouldCreateWithEmptySections() {
+            Event event = Event.create(VALID_NAME, VALID_DESCRIPTION, VALID_DATE,
+                    VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
+
+            assertTrue(event.getSections().isEmpty());
+        }
+    }
+
+    @Nested
+    @DisplayName("Sections")
+    class Sections {
+
+        @Test
+        @DisplayName("should maintain insertion order of sections")
+        void shouldMaintainInsertionOrder() {
+            EventSection first = EventSection.create("Pista", "Desc", 200, new BigDecimal("50.00"));
+            EventSection second = EventSection.create("VIP", "Desc", 50, new BigDecimal("200.00"));
+            EventSection third = EventSection.create("Camarote", "Desc", 20, new BigDecimal("500.00"));
+
+            Set<EventSection> sections = new LinkedHashSet<>();
+            sections.add(first);
+            sections.add(second);
+            sections.add(third);
+
+            Event event = new Event(VALID_NAME, VALID_DESCRIPTION, VALID_DATE, false,
+                    VALID_TOTAL_SPOTS, 0, VALID_PARTNER_ID, sections);
+
+            Iterator<EventSection> it = event.getSections().iterator();
+            assertSame(first, it.next());
+            assertSame(second, it.next());
+            assertSame(third, it.next());
+        }
+
+        @Test
+        @DisplayName("should not add duplicate sections (same ID)")
+        void shouldNotAddDuplicateSections() {
+            EventSectionId sharedId = new EventSectionId();
+            EventSection original = new EventSection(sharedId, "Pista", "Desc", false, 100, 0, new BigDecimal("50.00"));
+            EventSection duplicate = new EventSection(sharedId, "Pista Alterada", "Desc", false, 100, 0, new BigDecimal("50.00"));
+
+            Set<EventSection> sections = new LinkedHashSet<>();
+            sections.add(original);
+            sections.add(duplicate);
+
+            Event event = new Event(VALID_NAME, VALID_DESCRIPTION, VALID_DATE, false,
+                    VALID_TOTAL_SPOTS, 0, VALID_PARTNER_ID, sections);
+
+            assertEquals(1, event.getSections().size());
+        }
+
+        @Test
+        @DisplayName("getSections should return an unmodifiable view")
+        void shouldReturnUnmodifiableSet() {
+            Event event = Event.create(VALID_NAME, VALID_DESCRIPTION, VALID_DATE,
+                    VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
+
+            EventSection section = EventSection.create("Pista", "Desc", 100, new BigDecimal("50.00"));
+            assertThrows(UnsupportedOperationException.class, () -> event.getSections().add(section));
         }
     }
 
