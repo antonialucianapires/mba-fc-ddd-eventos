@@ -5,6 +5,9 @@ import com.mba.fc.ingressos.core.common.domain.valueobjects.EventId;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.PartnerId;
 
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class Event extends AggregateRoot<EventId> {
 
@@ -15,6 +18,7 @@ public class Event extends AggregateRoot<EventId> {
     private final int totalSpots;
     private final int totalSpotsReserved;
     private final PartnerId partnerId;
+    private final Set<EventSection> sections = new LinkedHashSet<>();
 
     public Event(String name, String description, LocalDate date, boolean isPublished,
                  int totalSpots, int totalSpotsReserved, PartnerId partnerId) {
@@ -26,6 +30,19 @@ public class Event extends AggregateRoot<EventId> {
         this.totalSpots = totalSpots;
         this.totalSpotsReserved = totalSpotsReserved;
         this.partnerId = partnerId;
+    }
+
+    public Event(String name, String description, LocalDate date, boolean isPublished,
+                 int totalSpots, int totalSpotsReserved, PartnerId partnerId, Set<EventSection> sections) {
+        super(new EventId());
+        this.name = name;
+        this.description = description;
+        this.date = date;
+        this.isPublished = isPublished;
+        this.totalSpots = totalSpots;
+        this.totalSpotsReserved = totalSpotsReserved;
+        this.partnerId = partnerId;
+        this.sections.addAll(sections);
     }
 
     public Event(String id, String name, String description, LocalDate date, boolean isPublished,
@@ -40,6 +57,19 @@ public class Event extends AggregateRoot<EventId> {
         this.partnerId = partnerId;
     }
 
+    public Event(String id, String name, String description, LocalDate date, boolean isPublished,
+                 int totalSpots, int totalSpotsReserved, PartnerId partnerId, Set<EventSection> sections) {
+        super(new EventId(id));
+        this.name = name;
+        this.description = description;
+        this.date = date;
+        this.isPublished = isPublished;
+        this.totalSpots = totalSpots;
+        this.totalSpotsReserved = totalSpotsReserved;
+        this.partnerId = partnerId;
+        this.sections.addAll(sections);
+    }
+
     public Event(EventId id, String name, String description, LocalDate date, boolean isPublished,
                  int totalSpots, int totalSpotsReserved, PartnerId partnerId) {
         super(id);
@@ -52,18 +82,22 @@ public class Event extends AggregateRoot<EventId> {
         this.partnerId = partnerId;
     }
 
+    public Event(EventId id, String name, String description, LocalDate date, boolean isPublished,
+                 int totalSpots, int totalSpotsReserved, PartnerId partnerId, Set<EventSection> sections) {
+        super(id);
+        this.name = name;
+        this.description = description;
+        this.date = date;
+        this.isPublished = isPublished;
+        this.totalSpots = totalSpots;
+        this.totalSpotsReserved = totalSpotsReserved;
+        this.partnerId = partnerId;
+        this.sections.addAll(sections);
+    }
+
     public static Event create(String name, String description, LocalDate date,
                                int totalSpots, PartnerId partnerId) {
-        return new Event(
-                new EventId(),
-                name,
-                description,
-                date,
-                false,
-                totalSpots,
-                0,
-                partnerId
-        );
+        return new Event(new EventId(), name, description, date, false, totalSpots, 0, partnerId);
     }
 
     public EventId getId() {
@@ -96,6 +130,10 @@ public class Event extends AggregateRoot<EventId> {
 
     public PartnerId getPartnerId() {
         return partnerId;
+    }
+
+    public Set<EventSection> getSections() {
+        return Collections.unmodifiableSet(sections);
     }
 
     @Override
