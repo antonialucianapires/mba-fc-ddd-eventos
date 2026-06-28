@@ -33,7 +33,7 @@ class EventTest {
         @DisplayName("given no ID, should generate a valid UUID automatically")
         void shouldGenerateIdWhenNotProvided() {
             Event event = new Event(VALID_NAME, VALID_DESCRIPTION, VALID_DATE, false,
-                    VALID_TOTAL_SPOTS, 0, VALID_PARTNER_ID);
+                    VALID_TOTAL_SPOTS, 0, VALID_PARTNER_ID, new LinkedHashSet<>());
 
             assertNotNull(event.getId());
             assertDoesNotThrow(() -> UUID.fromString(event.getId().getValue()));
@@ -44,7 +44,7 @@ class EventTest {
         void shouldWrapStringIntoEventId() {
             String rawId = UUID.randomUUID().toString();
             Event event = new Event(rawId, VALID_NAME, VALID_DESCRIPTION, VALID_DATE, false,
-                    VALID_TOTAL_SPOTS, 0, VALID_PARTNER_ID);
+                    VALID_TOTAL_SPOTS, 0, VALID_PARTNER_ID, new LinkedHashSet<>());
 
             assertInstanceOf(EventId.class, event.getId());
             assertEquals(rawId, event.getId().getValue());
@@ -55,7 +55,7 @@ class EventTest {
         void shouldReuseEventId() {
             EventId eventId = new EventId();
             Event event = new Event(eventId, VALID_NAME, VALID_DESCRIPTION, VALID_DATE, false,
-                    VALID_TOTAL_SPOTS, 0, VALID_PARTNER_ID);
+                    VALID_TOTAL_SPOTS, 0, VALID_PARTNER_ID, new LinkedHashSet<>());
 
             assertSame(eventId, event.getId());
         }
@@ -64,7 +64,7 @@ class EventTest {
         @DisplayName("should store all provided fields correctly")
         void shouldStoreAllFields() {
             Event event = new Event(VALID_NAME, VALID_DESCRIPTION, VALID_DATE, true,
-                    VALID_TOTAL_SPOTS, 10, VALID_PARTNER_ID);
+                    VALID_TOTAL_SPOTS, 10, VALID_PARTNER_ID, new LinkedHashSet<>());
 
             assertEquals(VALID_NAME, event.getName());
             assertEquals(VALID_DESCRIPTION, event.getDescription());
@@ -79,7 +79,7 @@ class EventTest {
         @DisplayName("should start with empty sections when none are provided")
         void shouldStartWithEmptySections() {
             Event event = new Event(VALID_NAME, VALID_DESCRIPTION, VALID_DATE, false,
-                    VALID_TOTAL_SPOTS, 0, VALID_PARTNER_ID);
+                    VALID_TOTAL_SPOTS, 0, VALID_PARTNER_ID, new LinkedHashSet<>());
 
             assertTrue(event.getSections().isEmpty());
         }
@@ -229,8 +229,8 @@ class EventTest {
         @DisplayName("should be equal when both events share the same ID regardless of other fields")
         void shouldBeEqualWithSameId() {
             String id = UUID.randomUUID().toString();
-            Event a = new Event(id, "Name A", "Desc A", VALID_DATE, false, 50, 0, VALID_PARTNER_ID);
-            Event b = new Event(id, "Name B", "Desc B", VALID_DATE, true, 200, 10, VALID_PARTNER_ID);
+            Event a = new Event(id, "Name A", "Desc A", VALID_DATE, false, 50, 0, VALID_PARTNER_ID, new LinkedHashSet<>());
+            Event b = new Event(id, "Name B", "Desc B", VALID_DATE, true, 200, 10, VALID_PARTNER_ID, new LinkedHashSet<>());
 
             assertEquals(a, b);
             assertEquals(a.hashCode(), b.hashCode());

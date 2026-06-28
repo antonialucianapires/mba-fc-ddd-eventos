@@ -18,19 +18,7 @@ public class Event extends AggregateRoot<EventId> {
     private final int totalSpots;
     private final int totalSpotsReserved;
     private final PartnerId partnerId;
-    private final Set<EventSection> sections = new LinkedHashSet<>();
-
-    public Event(String name, String description, LocalDate date, boolean isPublished,
-                 int totalSpots, int totalSpotsReserved, PartnerId partnerId) {
-        super(new EventId());
-        this.name = name;
-        this.description = description;
-        this.date = date;
-        this.isPublished = isPublished;
-        this.totalSpots = totalSpots;
-        this.totalSpotsReserved = totalSpotsReserved;
-        this.partnerId = partnerId;
-    }
+    private final Set<EventSection> sections;
 
     public Event(String name, String description, LocalDate date, boolean isPublished,
                  int totalSpots, int totalSpotsReserved, PartnerId partnerId, Set<EventSection> sections) {
@@ -42,19 +30,7 @@ public class Event extends AggregateRoot<EventId> {
         this.totalSpots = totalSpots;
         this.totalSpotsReserved = totalSpotsReserved;
         this.partnerId = partnerId;
-        this.sections.addAll(sections);
-    }
-
-    public Event(String id, String name, String description, LocalDate date, boolean isPublished,
-                 int totalSpots, int totalSpotsReserved, PartnerId partnerId) {
-        super(new EventId(id));
-        this.name = name;
-        this.description = description;
-        this.date = date;
-        this.isPublished = isPublished;
-        this.totalSpots = totalSpots;
-        this.totalSpotsReserved = totalSpotsReserved;
-        this.partnerId = partnerId;
+        this.sections = new LinkedHashSet<>(sections);
     }
 
     public Event(String id, String name, String description, LocalDate date, boolean isPublished,
@@ -67,19 +43,7 @@ public class Event extends AggregateRoot<EventId> {
         this.totalSpots = totalSpots;
         this.totalSpotsReserved = totalSpotsReserved;
         this.partnerId = partnerId;
-        this.sections.addAll(sections);
-    }
-
-    public Event(EventId id, String name, String description, LocalDate date, boolean isPublished,
-                 int totalSpots, int totalSpotsReserved, PartnerId partnerId) {
-        super(id);
-        this.name = name;
-        this.description = description;
-        this.date = date;
-        this.isPublished = isPublished;
-        this.totalSpots = totalSpots;
-        this.totalSpotsReserved = totalSpotsReserved;
-        this.partnerId = partnerId;
+        this.sections = new LinkedHashSet<>(sections);
     }
 
     public Event(EventId id, String name, String description, LocalDate date, boolean isPublished,
@@ -92,12 +56,12 @@ public class Event extends AggregateRoot<EventId> {
         this.totalSpots = totalSpots;
         this.totalSpotsReserved = totalSpotsReserved;
         this.partnerId = partnerId;
-        this.sections.addAll(sections);
+        this.sections = new LinkedHashSet<>(sections);
     }
 
     public static Event create(String name, String description, LocalDate date,
                                int totalSpots, PartnerId partnerId) {
-        return new Event(new EventId(), name, description, date, false, totalSpots, 0, partnerId);
+        return new Event(new EventId(), name, description, date, false, totalSpots, 0, partnerId, new LinkedHashSet<>());
     }
 
     public EventId getId() {
@@ -138,6 +102,6 @@ public class Event extends AggregateRoot<EventId> {
 
     @Override
     public String toString() {
-        return "Event{id=" + id.getValue() + ", name=" + name + ", date=" + date + ", partnerId=" + partnerId.getValue() + "}";
+        return "Event{id=" + id.getValue() + ", name=" + name + ", date=" + date + ", partnerId=" + partnerId.getValue() + ", totalSpots=" + totalSpots + ", totalSpotsReserved=" + totalSpotsReserved + ", sections=" + sections + "}";
     }
 }

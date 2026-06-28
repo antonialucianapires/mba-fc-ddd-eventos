@@ -52,6 +52,6 @@ public class EventSpot extends Entity<EventSpotId> {
 
     @Override
     public String toString() {
-        return "EventSpot{id=" + id.getValue() + ", location=" + location + "}";
+        return "EventSpot{id=" + id.getValue() + ", location=" + location + ", isReserved=" + isReserved + ", isPublished=" + isPublished + "}";
     }
 }

@@ -16,7 +16,7 @@ public class EventSection extends Entity<EventSectionId> {
     private final int totalSpots;
     private final int totalSpotsReserved;
     private final BigDecimal price;
-    private final Set<EventSpot> spots = new LinkedHashSet<>();
+    private final Set<EventSpot> spots;
 
     public EventSection(String name, String description, boolean isPublished,
                         int totalSpots, int totalSpotsReserved, BigDecimal price, Set<EventSpot> spots) {
@@ -27,7 +27,7 @@ public class EventSection extends Entity<EventSectionId> {
         this.totalSpots = totalSpots;
         this.totalSpotsReserved = totalSpotsReserved;
         this.price = price;
-        this.spots.addAll(spots);
+        this.spots = new LinkedHashSet<>(spots);
     }
 
     public EventSection(String id, String name, String description, boolean isPublished,
@@ -39,7 +39,7 @@ public class EventSection extends Entity<EventSectionId> {
         this.totalSpots = totalSpots;
         this.totalSpotsReserved = totalSpotsReserved;
         this.price = price;
-        this.spots.addAll(spots);
+        this.spots = new LinkedHashSet<>(spots);
     }
 
     public EventSection(EventSectionId id, String name, String description, boolean isPublished,
@@ -51,7 +51,7 @@ public class EventSection extends Entity<EventSectionId> {
         this.totalSpots = totalSpots;
         this.totalSpotsReserved = totalSpotsReserved;
         this.price = price;
-        this.spots.addAll(spots);
+        this.spots = new LinkedHashSet<>(spots);
     }
 
     public static EventSection create(String name, String description, int totalSpots, BigDecimal price) {
@@ -101,6 +101,6 @@ public class EventSection extends Entity<EventSectionId> {
 
     @Override
     public String toString() {
-        return "EventSection{id=" + id.getValue() + ", name=" + name + ", price=" + price + "}";
+        return "EventSection{id=" + id.getValue() + ", name=" + name + ", price=" + price + ", totalSpots=" + totalSpots + ", totalSpotsReserved=" + totalSpotsReserved + ", spots=" + spots + "}";
     }
 }
