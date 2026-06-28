@@ -4,6 +4,9 @@ import com.mba.fc.ingressos.core.common.domain.Entity;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventSectionId;
 
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class EventSection extends Entity<EventSectionId> {
 
@@ -13,9 +16,10 @@ public class EventSection extends Entity<EventSectionId> {
     private final int totalSpots;
     private final int totalSpotsReserved;
     private final BigDecimal price;
+    private final Set<EventSpot> spots = new LinkedHashSet<>();
 
     public EventSection(String name, String description, boolean isPublished,
-                        int totalSpots, int totalSpotsReserved, BigDecimal price) {
+                        int totalSpots, int totalSpotsReserved, BigDecimal price, Set<EventSpot> spots) {
         super(new EventSectionId());
         this.name = name;
         this.description = description;
@@ -23,10 +27,11 @@ public class EventSection extends Entity<EventSectionId> {
         this.totalSpots = totalSpots;
         this.totalSpotsReserved = totalSpotsReserved;
         this.price = price;
+        this.spots.addAll(spots);
     }
 
     public EventSection(String id, String name, String description, boolean isPublished,
-                        int totalSpots, int totalSpotsReserved, BigDecimal price) {
+                        int totalSpots, int totalSpotsReserved, BigDecimal price, Set<EventSpot> spots) {
         super(new EventSectionId(id));
         this.name = name;
         this.description = description;
@@ -34,10 +39,11 @@ public class EventSection extends Entity<EventSectionId> {
         this.totalSpots = totalSpots;
         this.totalSpotsReserved = totalSpotsReserved;
         this.price = price;
+        this.spots.addAll(spots);
     }
 
     public EventSection(EventSectionId id, String name, String description, boolean isPublished,
-                        int totalSpots, int totalSpotsReserved, BigDecimal price) {
+                        int totalSpots, int totalSpotsReserved, BigDecimal price, Set<EventSpot> spots) {
         super(id);
         this.name = name;
         this.description = description;
@@ -45,6 +51,7 @@ public class EventSection extends Entity<EventSectionId> {
         this.totalSpots = totalSpots;
         this.totalSpotsReserved = totalSpotsReserved;
         this.price = price;
+        this.spots.addAll(spots);
     }
 
     public static EventSection create(String name, String description, int totalSpots, BigDecimal price) {
@@ -55,7 +62,8 @@ public class EventSection extends Entity<EventSectionId> {
                 false,
                 totalSpots,
                 0,
-                price
+                price,
+                new LinkedHashSet<>()
         );
     }
 
@@ -85,6 +93,10 @@ public class EventSection extends Entity<EventSectionId> {
 
     public BigDecimal getPrice() {
         return price;
+    }
+
+    public Set<EventSpot> getSpots() {
+        return Collections.unmodifiableSet(spots);
     }
 
     @Override
