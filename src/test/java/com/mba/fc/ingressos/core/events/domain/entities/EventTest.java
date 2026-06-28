@@ -197,8 +197,8 @@ class EventTest {
         @DisplayName("should not add duplicate sections (same ID)")
         void shouldNotAddDuplicateSections() {
             EventSectionId sharedId = new EventSectionId();
-            EventSection original = new EventSection(sharedId, "Pista", "Desc", false, 100, 0, new BigDecimal("50.00"));
-            EventSection duplicate = new EventSection(sharedId, "Pista Alterada", "Desc", false, 100, 0, new BigDecimal("50.00"));
+            EventSection original = new EventSection(sharedId, "Pista", "Desc", false, 100, 0, new BigDecimal("50.00"), new LinkedHashSet<>());
+            EventSection duplicate = new EventSection(sharedId, "Pista Alterada", "Desc", false, 100, 0, new BigDecimal("50.00"), new LinkedHashSet<>());
 
             Set<EventSection> sections = new LinkedHashSet<>();
             sections.add(original);
