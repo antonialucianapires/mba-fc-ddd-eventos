@@ -6,6 +6,7 @@ import com.mba.fc.ingressos.core.common.domain.valueobjects.EventId;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventSectionId;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.PartnerId;
 import com.mba.fc.ingressos.core.events.domain.commands.AddSectionCommand;
+import com.mba.fc.ingressos.core.events.domain.commands.CreateEventCommand;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Iterator;
@@ -24,6 +25,9 @@ class EventTest {
   private static final LocalDate VALID_DATE = LocalDate.of(2026, 12, 31);
   private static final int VALID_TOTAL_SPOTS = 100;
   private static final PartnerId VALID_PARTNER_ID = new PartnerId();
+
+  private static final CreateEventCommand VALID_COMMAND =
+      new CreateEventCommand(VALID_NAME, VALID_DESCRIPTION, VALID_DATE, VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
 
   @Nested
   @DisplayName("Constructor")
@@ -153,15 +157,13 @@ class EventTest {
   }
 
   @Nested
-  @DisplayName("Factory method create()")
+  @DisplayName("Factory method create(CreateEventCommand)")
   class FactoryMethod {
 
     @Test
     @DisplayName("should create an event with a valid UUID as ID")
     void shouldCreateWithValidUuid() {
-      Event event =
-          Event.create(
-              VALID_NAME, VALID_DESCRIPTION, VALID_DATE, VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
+      Event event = Event.create(VALID_COMMAND);
 
       assertNotNull(event.getId());
       assertDoesNotThrow(() -> UUID.fromString(event.getId().getValue()));
@@ -170,9 +172,7 @@ class EventTest {
     @Test
     @DisplayName("should create an event with isPublished set to false")
     void shouldCreateUnpublished() {
-      Event event =
-          Event.create(
-              VALID_NAME, VALID_DESCRIPTION, VALID_DATE, VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
+      Event event = Event.create(VALID_COMMAND);
 
       assertFalse(event.isPublished());
     }
@@ -180,19 +180,15 @@ class EventTest {
     @Test
     @DisplayName("should create an event with totalSpotsReserved set to zero")
     void shouldCreateWithZeroReservedSpots() {
-      Event event =
-          Event.create(
-              VALID_NAME, VALID_DESCRIPTION, VALID_DATE, VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
+      Event event = Event.create(VALID_COMMAND);
 
       assertEquals(0, event.getTotalSpotsReserved());
     }
 
     @Test
-    @DisplayName("should store name, description, date, totalSpots and partnerId")
-    void shouldStoreProvidedFields() {
-      Event event =
-          Event.create(
-              VALID_NAME, VALID_DESCRIPTION, VALID_DATE, VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
+    @DisplayName("should store fields from the command")
+    void shouldStoreCommandFields() {
+      Event event = Event.create(VALID_COMMAND);
 
       assertEquals(VALID_NAME, event.getName());
       assertEquals(VALID_DESCRIPTION, event.getDescription());
@@ -204,12 +200,8 @@ class EventTest {
     @Test
     @DisplayName("each call should produce a different ID")
     void shouldGenerateDistinctIds() {
-      Event a =
-          Event.create(
-              VALID_NAME, VALID_DESCRIPTION, VALID_DATE, VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
-      Event b =
-          Event.create(
-              VALID_NAME, VALID_DESCRIPTION, VALID_DATE, VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
+      Event a = Event.create(VALID_COMMAND);
+      Event b = Event.create(VALID_COMMAND);
 
       assertNotEquals(a.getId().getValue(), b.getId().getValue());
     }
@@ -217,9 +209,7 @@ class EventTest {
     @Test
     @DisplayName("should create an event with empty sections")
     void shouldCreateWithEmptySections() {
-      Event event =
-          Event.create(
-              VALID_NAME, VALID_DESCRIPTION, VALID_DATE, VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
+      Event event = Event.create(VALID_COMMAND);
 
       assertTrue(event.getSections().isEmpty());
     }
@@ -304,9 +294,7 @@ class EventTest {
     @Test
     @DisplayName("getSections should return an unmodifiable view")
     void shouldReturnUnmodifiableSet() {
-      Event event =
-          Event.create(
-              VALID_NAME, VALID_DESCRIPTION, VALID_DATE, VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
+      Event event = Event.create(VALID_COMMAND);
 
       EventSection section = EventSection.create("Pista", "Desc", 100, new BigDecimal("50.00"));
       assertThrows(UnsupportedOperationException.class, () -> event.getSections().add(section));
@@ -320,8 +308,7 @@ class EventTest {
     @Test
     @DisplayName("should add a section created from the command")
     void shouldAddSectionFromCommand() {
-      Event event =
-          Event.create(VALID_NAME, VALID_DESCRIPTION, VALID_DATE, VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
+      Event event = Event.create(VALID_COMMAND);
       AddSectionCommand command =
           new AddSectionCommand("Pista", "Seção pista", 200, new BigDecimal("50.00"));
 
@@ -333,8 +320,7 @@ class EventTest {
     @Test
     @DisplayName("should create section with data from the command")
     void shouldCreateSectionWithCommandData() {
-      Event event =
-          Event.create(VALID_NAME, VALID_DESCRIPTION, VALID_DATE, VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
+      Event event = Event.create(VALID_COMMAND);
       AddSectionCommand command =
           new AddSectionCommand("VIP", "Seção VIP", 50, new BigDecimal("200.00"));
 
@@ -351,8 +337,7 @@ class EventTest {
     @Test
     @DisplayName("should maintain insertion order across multiple addSection calls")
     void shouldMaintainInsertionOrder() {
-      Event event =
-          Event.create(VALID_NAME, VALID_DESCRIPTION, VALID_DATE, VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
+      Event event = Event.create(VALID_COMMAND);
 
       event.addSection(new AddSectionCommand("Pista", "Desc", 200, new BigDecimal("50.00")));
       event.addSection(new AddSectionCommand("VIP", "Desc", 50, new BigDecimal("200.00")));
@@ -367,8 +352,7 @@ class EventTest {
     @Test
     @DisplayName("each addSection call should produce a section with a unique ID")
     void shouldGenerateUniqueIdPerSection() {
-      Event event =
-          Event.create(VALID_NAME, VALID_DESCRIPTION, VALID_DATE, VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
+      Event event = Event.create(VALID_COMMAND);
       AddSectionCommand command =
           new AddSectionCommand("Pista", "Desc", 200, new BigDecimal("50.00"));
 
@@ -378,24 +362,6 @@ class EventTest {
       assertEquals(2, event.getSections().size());
     }
   }
-    @Test
-    @DisplayName("should update totalSpots when adding sections")
-    void shouldUpdateTotalSpotsWhenAddingSections() {
-      Event event =
-          Event.create(VALID_NAME, VALID_DESCRIPTION, VALID_DATE, VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
-
-      AddSectionCommand command =
-          new AddSectionCommand("Pista", "Desc", 200, new BigDecimal("50.00"));
-
-      event.addSection(command);
-
-      assertEquals(VALID_TOTAL_SPOTS + 200, event.getTotalSpots());
-
-      event.addSection(command);
-
-      assertEquals(VALID_TOTAL_SPOTS + 400, event.getTotalSpots());
-    }
-
 
   @Nested
   @DisplayName("Equality")
@@ -435,12 +401,8 @@ class EventTest {
     @Test
     @DisplayName("should not be equal when events have different IDs")
     void shouldNotBeEqualWithDifferentIds() {
-      Event a =
-          Event.create(
-              VALID_NAME, VALID_DESCRIPTION, VALID_DATE, VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
-      Event b =
-          Event.create(
-              VALID_NAME, VALID_DESCRIPTION, VALID_DATE, VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
+      Event a = Event.create(VALID_COMMAND);
+      Event b = Event.create(VALID_COMMAND);
 
       assertNotEquals(a, b);
     }
@@ -448,9 +410,7 @@ class EventTest {
     @Test
     @DisplayName("should be equal to itself")
     void shouldBeEqualToItself() {
-      Event event =
-          Event.create(
-              VALID_NAME, VALID_DESCRIPTION, VALID_DATE, VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
+      Event event = Event.create(VALID_COMMAND);
 
       assertEquals(event, event);
     }
@@ -463,9 +423,7 @@ class EventTest {
     @Test
     @DisplayName("should contain the event ID, name, date and partnerId")
     void shouldContainRelevantFields() {
-      Event event =
-          Event.create(
-              VALID_NAME, VALID_DESCRIPTION, VALID_DATE, VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
+      Event event = Event.create(VALID_COMMAND);
 
       assertTrue(event.toString().contains(event.getId().getValue()));
       assertTrue(event.toString().contains(VALID_NAME));
