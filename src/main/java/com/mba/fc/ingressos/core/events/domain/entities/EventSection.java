@@ -74,21 +74,9 @@ public class EventSection extends Entity<EventSectionId> {
     this.spots = new LinkedHashSet<>(spots);
   }
 
-  public static EventSection create(
-      String name, String description, int totalSpots, BigDecimal price) {
-    return new EventSection(
-        new EventSectionId(),
-        name,
-        description,
-        false,
-        totalSpots,
-        0,
-        price,
-        new LinkedHashSet<>());
-  }
-
   public static EventSection create(AddSectionCommand command) {
-    var section = new EventSection(
+    var section =
+        new EventSection(
             new EventSectionId(),
             command.name(),
             command.description(),
@@ -107,6 +95,98 @@ public class EventSection extends Entity<EventSectionId> {
       EventSpot spot = EventSpot.create(location);
       spots.add(spot);
     }
+  }
+
+  public EventSection changeName(String name) {
+    return new EventSection(
+        this.id,
+        name,
+        this.description,
+        this.isPublished,
+        this.totalSpots,
+        this.totalSpotsReserved,
+        this.price,
+        this.spots);
+  }
+
+  public EventSection changeDescription(String description) {
+    return new EventSection(
+        this.id,
+        this.name,
+        description,
+        this.isPublished,
+        this.totalSpots,
+        this.totalSpotsReserved,
+        this.price,
+        this.spots);
+  }
+
+  public EventSection changePrice(BigDecimal price) {
+    return new EventSection(
+        this.id,
+        this.name,
+        this.description,
+        this.isPublished,
+        this.totalSpots,
+        this.totalSpotsReserved,
+        price,
+        this.spots);
+  }
+
+  public EventSection publish() {
+    return new EventSection(
+        this.id,
+        this.name,
+        this.description,
+        true,
+        this.totalSpots,
+        this.totalSpotsReserved,
+        this.price,
+        this.spots);
+  }
+
+  public EventSection unpublish() {
+    return new EventSection(
+        this.id,
+        this.name,
+        this.description,
+        false,
+        this.totalSpots,
+        this.totalSpotsReserved,
+        this.price,
+        this.spots);
+  }
+
+  public EventSection publishAll() {
+    Set<EventSpot> publishedSpots = new LinkedHashSet<>();
+    for (EventSpot spot : spots) {
+      publishedSpots.add(spot.publish());
+    }
+    return new EventSection(
+        this.id,
+        this.name,
+        this.description,
+        true,
+        this.totalSpots,
+        this.totalSpotsReserved,
+        this.price,
+        publishedSpots);
+  }
+
+  public EventSection unpublishAll() {
+    Set<EventSpot> unpublishedSpots = new LinkedHashSet<>();
+    for (EventSpot spot : spots) {
+      unpublishedSpots.add(spot.unpublish());
+    }
+    return new EventSection(
+        this.id,
+        this.name,
+        this.description,
+        false,
+        this.totalSpots,
+        this.totalSpotsReserved,
+        this.price,
+        unpublishedSpots);
   }
 
   public EventSectionId getId() {

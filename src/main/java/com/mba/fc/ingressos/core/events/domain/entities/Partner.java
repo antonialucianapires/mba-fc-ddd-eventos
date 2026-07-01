@@ -36,7 +36,9 @@ public class Partner extends AggregateRoot<PartnerId> {
   }
 
   public Event initEvent(CreateEventCommand command) {
-    return Event.create(new CreateEventCommand(command.name(), command.description(), command.date(), command.totalSpots(), this.id));
+    return Event.create(
+        new CreateEventCommand(
+            command.name(), command.description(), command.date(), command.totalSpots(), this.id));
   }
 
   public PartnerId getId() {

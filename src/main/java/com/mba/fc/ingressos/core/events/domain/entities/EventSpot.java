@@ -34,6 +34,22 @@ public class EventSpot extends Entity<EventSpotId> {
     return new EventSpot(new EventSpotId(), location, false, false);
   }
 
+  public EventSpot changeLocation(String location) {
+    return new EventSpot(this.id, location, this.isReserved, this.isPublished);
+  }
+
+  public EventSpot reserve() {
+    return new EventSpot(this.id, this.location, true, this.isPublished);
+  }
+
+  public EventSpot publish() {
+    return new EventSpot(this.id, this.location, this.isReserved, true);
+  }
+
+  public EventSpot unpublish() {
+    return new EventSpot(this.id, this.location, this.isReserved, false);
+  }
+
   public EventSpotId getId() {
     return id;
   }

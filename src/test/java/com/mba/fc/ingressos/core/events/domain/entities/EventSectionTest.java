@@ -20,8 +20,9 @@ class EventSectionTest {
 
   private static final String VALID_NAME = "Pista";
   private static final String VALID_DESCRIPTION = "Seção pista";
-  private static final int VALID_TOTAL_SPOTS = 200;
   private static final BigDecimal VALID_PRICE = new BigDecimal("150.00");
+  private static final AddSectionCommand VALID_COMMAND =
+      new AddSectionCommand(VALID_NAME, VALID_DESCRIPTION, 3, VALID_PRICE);
 
   @Nested
   @DisplayName("Constructor")
@@ -32,13 +33,7 @@ class EventSectionTest {
     void shouldGenerateIdWhenNotProvided() {
       EventSection section =
           new EventSection(
-              VALID_NAME,
-              VALID_DESCRIPTION,
-              false,
-              VALID_TOTAL_SPOTS,
-              0,
-              VALID_PRICE,
-              new LinkedHashSet<>());
+              VALID_NAME, VALID_DESCRIPTION, false, 3, 0, VALID_PRICE, new LinkedHashSet<>());
 
       assertNotNull(section.getId());
       assertDoesNotThrow(() -> UUID.fromString(section.getId().getValue()));
@@ -54,7 +49,7 @@ class EventSectionTest {
               VALID_NAME,
               VALID_DESCRIPTION,
               false,
-              VALID_TOTAL_SPOTS,
+              3,
               0,
               VALID_PRICE,
               new LinkedHashSet<>());
@@ -73,7 +68,7 @@ class EventSectionTest {
               VALID_NAME,
               VALID_DESCRIPTION,
               false,
-              VALID_TOTAL_SPOTS,
+              3,
               0,
               VALID_PRICE,
               new LinkedHashSet<>());
@@ -86,19 +81,13 @@ class EventSectionTest {
     void shouldStoreAllFields() {
       EventSection section =
           new EventSection(
-              VALID_NAME,
-              VALID_DESCRIPTION,
-              true,
-              VALID_TOTAL_SPOTS,
-              50,
-              VALID_PRICE,
-              new LinkedHashSet<>());
+              VALID_NAME, VALID_DESCRIPTION, true, 3, 1, VALID_PRICE, new LinkedHashSet<>());
 
       assertEquals(VALID_NAME, section.getName());
       assertEquals(VALID_DESCRIPTION, section.getDescription());
       assertTrue(section.isPublished());
-      assertEquals(VALID_TOTAL_SPOTS, section.getTotalSpots());
-      assertEquals(50, section.getTotalSpotsReserved());
+      assertEquals(3, section.getTotalSpots());
+      assertEquals(1, section.getTotalSpotsReserved());
       assertEquals(VALID_PRICE, section.getPrice());
     }
 
@@ -112,8 +101,7 @@ class EventSectionTest {
       spots.add(s2);
 
       EventSection section =
-          new EventSection(
-              VALID_NAME, VALID_DESCRIPTION, false, VALID_TOTAL_SPOTS, 0, VALID_PRICE, spots);
+          new EventSection(VALID_NAME, VALID_DESCRIPTION, false, 3, 0, VALID_PRICE, spots);
 
       assertEquals(2, section.getSpots().size());
       assertTrue(section.getSpots().contains(s1));
@@ -122,76 +110,8 @@ class EventSectionTest {
   }
 
   @Nested
-  @DisplayName("Factory method create()")
-  class FactoryMethod {
-
-    @Test
-    @DisplayName("should create a section with a valid UUID as ID")
-    void shouldCreateWithValidUuid() {
-      EventSection section =
-          EventSection.create(VALID_NAME, VALID_DESCRIPTION, VALID_TOTAL_SPOTS, VALID_PRICE);
-
-      assertNotNull(section.getId());
-      assertDoesNotThrow(() -> UUID.fromString(section.getId().getValue()));
-    }
-
-    @Test
-    @DisplayName("should create a section with isPublished set to false")
-    void shouldCreateUnpublished() {
-      EventSection section =
-          EventSection.create(VALID_NAME, VALID_DESCRIPTION, VALID_TOTAL_SPOTS, VALID_PRICE);
-
-      assertFalse(section.isPublished());
-    }
-
-    @Test
-    @DisplayName("should create a section with totalSpotsReserved set to zero")
-    void shouldCreateWithZeroReservedSpots() {
-      EventSection section =
-          EventSection.create(VALID_NAME, VALID_DESCRIPTION, VALID_TOTAL_SPOTS, VALID_PRICE);
-
-      assertEquals(0, section.getTotalSpotsReserved());
-    }
-
-    @Test
-    @DisplayName("should store name, description, totalSpots and price")
-    void shouldStoreProvidedFields() {
-      EventSection section =
-          EventSection.create(VALID_NAME, VALID_DESCRIPTION, VALID_TOTAL_SPOTS, VALID_PRICE);
-
-      assertEquals(VALID_NAME, section.getName());
-      assertEquals(VALID_DESCRIPTION, section.getDescription());
-      assertEquals(VALID_TOTAL_SPOTS, section.getTotalSpots());
-      assertEquals(VALID_PRICE, section.getPrice());
-    }
-
-    @Test
-    @DisplayName("each call should produce a different ID")
-    void shouldGenerateDistinctIds() {
-      EventSection a =
-          EventSection.create(VALID_NAME, VALID_DESCRIPTION, VALID_TOTAL_SPOTS, VALID_PRICE);
-      EventSection b =
-          EventSection.create(VALID_NAME, VALID_DESCRIPTION, VALID_TOTAL_SPOTS, VALID_PRICE);
-
-      assertNotEquals(a.getId().getValue(), b.getId().getValue());
-    }
-
-    @Test
-    @DisplayName("should create a section with empty spots")
-    void shouldCreateWithEmptySpots() {
-      EventSection section =
-          EventSection.create(VALID_NAME, VALID_DESCRIPTION, VALID_TOTAL_SPOTS, VALID_PRICE);
-
-      assertTrue(section.getSpots().isEmpty());
-    }
-  }
-
-  @Nested
   @DisplayName("Factory method create(AddSectionCommand)")
-  class FactoryMethodWithCommand {
-
-    private final AddSectionCommand VALID_COMMAND =
-        new AddSectionCommand(VALID_NAME, VALID_DESCRIPTION, 3, VALID_PRICE);
+  class FactoryMethod {
 
     @Test
     @DisplayName("should create a section with a valid UUID as ID")
@@ -241,7 +161,8 @@ class EventSectionTest {
     @Test
     @DisplayName("should initialize exactly totalSpots spots")
     void shouldInitializeExactNumberOfSpots() {
-      EventSection section = EventSection.create(new AddSectionCommand(VALID_NAME, VALID_DESCRIPTION, 5, VALID_PRICE));
+      EventSection section =
+          EventSection.create(new AddSectionCommand(VALID_NAME, VALID_DESCRIPTION, 5, VALID_PRICE));
 
       assertEquals(5, section.getSpots().size());
     }
@@ -249,7 +170,7 @@ class EventSectionTest {
     @Test
     @DisplayName("should initialize spots with sequential locations starting at 'Spot 1'")
     void shouldInitializeSpotsWithSequentialLocations() {
-      EventSection section = EventSection.create(new AddSectionCommand(VALID_NAME, VALID_DESCRIPTION, 3, VALID_PRICE));
+      EventSection section = EventSection.create(VALID_COMMAND);
 
       List<String> locations = section.getSpots().stream().map(EventSpot::getLocation).toList();
       assertEquals(List.of("Spot 1", "Spot 2", "Spot 3"), locations);
@@ -260,16 +181,19 @@ class EventSectionTest {
     void shouldInitializeSpotsUnreservedAndUnpublished() {
       EventSection section = EventSection.create(VALID_COMMAND);
 
-      section.getSpots().forEach(spot -> {
-        assertFalse(spot.isReserved());
-        assertFalse(spot.isPublished());
-      });
+      section
+          .getSpots()
+          .forEach(
+              spot -> {
+                assertFalse(spot.isReserved());
+                assertFalse(spot.isPublished());
+              });
     }
 
     @Test
     @DisplayName("should initialize spots in insertion order")
     void shouldInitializeSpotsInOrder() {
-      EventSection section = EventSection.create(new AddSectionCommand(VALID_NAME, VALID_DESCRIPTION, 3, VALID_PRICE));
+      EventSection section = EventSection.create(VALID_COMMAND);
 
       Iterator<EventSpot> it = section.getSpots().iterator();
       assertEquals("Spot 1", it.next().getLocation());
@@ -280,9 +204,275 @@ class EventSectionTest {
     @Test
     @DisplayName("should create no spots when totalSpots is zero")
     void shouldCreateNoSpotsWhenTotalSpotsIsZero() {
-      EventSection section = EventSection.create(new AddSectionCommand(VALID_NAME, VALID_DESCRIPTION, 0, VALID_PRICE));
+      EventSection section =
+          EventSection.create(new AddSectionCommand(VALID_NAME, VALID_DESCRIPTION, 0, VALID_PRICE));
 
       assertTrue(section.getSpots().isEmpty());
+    }
+  }
+
+  @Nested
+  @DisplayName("changeName")
+  class ChangeName {
+
+    @Test
+    @DisplayName("should return a new instance with the updated name")
+    void shouldReturnNewInstanceWithUpdatedName() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+      EventSection changed = section.changeName("VIP");
+
+      assertNotSame(section, changed);
+      assertEquals("VIP", changed.getName());
+    }
+
+    @Test
+    @DisplayName("should preserve the same ID")
+    void shouldPreserveId() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+      EventSection changed = section.changeName("VIP");
+
+      assertEquals(section.getId().getValue(), changed.getId().getValue());
+    }
+
+    @Test
+    @DisplayName("should not mutate the original instance")
+    void shouldNotMutateOriginal() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+      section.changeName("VIP");
+
+      assertEquals(VALID_NAME, section.getName());
+    }
+  }
+
+  @Nested
+  @DisplayName("changeDescription")
+  class ChangeDescription {
+
+    @Test
+    @DisplayName("should return a new instance with the updated description")
+    void shouldReturnNewInstanceWithUpdatedDescription() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+      EventSection changed = section.changeDescription("Nova descrição");
+
+      assertNotSame(section, changed);
+      assertEquals("Nova descrição", changed.getDescription());
+    }
+
+    @Test
+    @DisplayName("should preserve the same ID")
+    void shouldPreserveId() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+      EventSection changed = section.changeDescription("Nova descrição");
+
+      assertEquals(section.getId().getValue(), changed.getId().getValue());
+    }
+
+    @Test
+    @DisplayName("should not mutate the original instance")
+    void shouldNotMutateOriginal() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+      section.changeDescription("Nova descrição");
+
+      assertEquals(VALID_DESCRIPTION, section.getDescription());
+    }
+  }
+
+  @Nested
+  @DisplayName("changePrice")
+  class ChangePrice {
+
+    @Test
+    @DisplayName("should return a new instance with the updated price")
+    void shouldReturnNewInstanceWithUpdatedPrice() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+      BigDecimal newPrice = new BigDecimal("300.00");
+      EventSection changed = section.changePrice(newPrice);
+
+      assertNotSame(section, changed);
+      assertEquals(newPrice, changed.getPrice());
+    }
+
+    @Test
+    @DisplayName("should preserve the same ID")
+    void shouldPreserveId() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+      EventSection changed = section.changePrice(new BigDecimal("300.00"));
+
+      assertEquals(section.getId().getValue(), changed.getId().getValue());
+    }
+
+    @Test
+    @DisplayName("should not mutate the original instance")
+    void shouldNotMutateOriginal() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+      section.changePrice(new BigDecimal("300.00"));
+
+      assertEquals(VALID_PRICE, section.getPrice());
+    }
+  }
+
+  @Nested
+  @DisplayName("publish")
+  class Publish {
+
+    @Test
+    @DisplayName("should return a new instance with isPublished set to true")
+    void shouldReturnNewInstanceWithIsPublishedTrue() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+      EventSection published = section.publish();
+
+      assertNotSame(section, published);
+      assertTrue(published.isPublished());
+    }
+
+    @Test
+    @DisplayName("should preserve ID and spots")
+    void shouldPreserveIdAndSpots() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+      EventSection published = section.publish();
+
+      assertEquals(section.getId().getValue(), published.getId().getValue());
+      assertEquals(section.getSpots().size(), published.getSpots().size());
+    }
+
+    @Test
+    @DisplayName("should not change spot publication state")
+    void shouldNotChangeSpotPublicationState() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+      EventSection published = section.publish();
+
+      published.getSpots().forEach(spot -> assertFalse(spot.isPublished()));
+    }
+
+    @Test
+    @DisplayName("should not mutate the original instance")
+    void shouldNotMutateOriginal() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+      section.publish();
+
+      assertFalse(section.isPublished());
+    }
+  }
+
+  @Nested
+  @DisplayName("unpublish")
+  class Unpublish {
+
+    @Test
+    @DisplayName("should return a new instance with isPublished set to false")
+    void shouldReturnNewInstanceWithIsPublishedFalse() {
+      EventSection section = EventSection.create(VALID_COMMAND).publish();
+      EventSection unpublished = section.unpublish();
+
+      assertNotSame(section, unpublished);
+      assertFalse(unpublished.isPublished());
+    }
+
+    @Test
+    @DisplayName("should preserve ID and spots")
+    void shouldPreserveIdAndSpots() {
+      EventSection section = EventSection.create(VALID_COMMAND).publish();
+      EventSection unpublished = section.unpublish();
+
+      assertEquals(section.getId().getValue(), unpublished.getId().getValue());
+      assertEquals(section.getSpots().size(), unpublished.getSpots().size());
+    }
+
+    @Test
+    @DisplayName("should not mutate the original instance")
+    void shouldNotMutateOriginal() {
+      EventSection section = EventSection.create(VALID_COMMAND).publish();
+      section.unpublish();
+
+      assertTrue(section.isPublished());
+    }
+  }
+
+  @Nested
+  @DisplayName("publishAll")
+  class PublishAll {
+
+    @Test
+    @DisplayName("should return a new instance with isPublished set to true")
+    void shouldPublishSection() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+      EventSection result = section.publishAll();
+
+      assertNotSame(section, result);
+      assertTrue(result.isPublished());
+    }
+
+    @Test
+    @DisplayName("should publish all spots")
+    void shouldPublishAllSpots() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+      EventSection result = section.publishAll();
+
+      result.getSpots().forEach(spot -> assertTrue(spot.isPublished()));
+    }
+
+    @Test
+    @DisplayName("should preserve ID and spot count")
+    void shouldPreserveIdAndSpotCount() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+      EventSection result = section.publishAll();
+
+      assertEquals(section.getId().getValue(), result.getId().getValue());
+      assertEquals(section.getSpots().size(), result.getSpots().size());
+    }
+
+    @Test
+    @DisplayName("should not mutate the original instance")
+    void shouldNotMutateOriginal() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+      section.publishAll();
+
+      assertFalse(section.isPublished());
+      section.getSpots().forEach(spot -> assertFalse(spot.isPublished()));
+    }
+  }
+
+  @Nested
+  @DisplayName("unpublishAll")
+  class UnpublishAll {
+
+    @Test
+    @DisplayName("should return a new instance with isPublished set to false")
+    void shouldUnpublishSection() {
+      EventSection section = EventSection.create(VALID_COMMAND).publishAll();
+      EventSection result = section.unpublishAll();
+
+      assertNotSame(section, result);
+      assertFalse(result.isPublished());
+    }
+
+    @Test
+    @DisplayName("should unpublish all spots")
+    void shouldUnpublishAllSpots() {
+      EventSection section = EventSection.create(VALID_COMMAND).publishAll();
+      EventSection result = section.unpublishAll();
+
+      result.getSpots().forEach(spot -> assertFalse(spot.isPublished()));
+    }
+
+    @Test
+    @DisplayName("should preserve ID and spot count")
+    void shouldPreserveIdAndSpotCount() {
+      EventSection section = EventSection.create(VALID_COMMAND).publishAll();
+      EventSection result = section.unpublishAll();
+
+      assertEquals(section.getId().getValue(), result.getId().getValue());
+      assertEquals(section.getSpots().size(), result.getSpots().size());
+    }
+
+    @Test
+    @DisplayName("should not mutate the original instance")
+    void shouldNotMutateOriginal() {
+      EventSection section = EventSection.create(VALID_COMMAND).publishAll();
+      section.unpublishAll();
+
+      assertTrue(section.isPublished());
+      section.getSpots().forEach(spot -> assertTrue(spot.isPublished()));
     }
   }
 
@@ -303,8 +493,7 @@ class EventSectionTest {
       spots.add(third);
 
       EventSection section =
-          new EventSection(
-              VALID_NAME, VALID_DESCRIPTION, false, VALID_TOTAL_SPOTS, 0, VALID_PRICE, spots);
+          new EventSection(VALID_NAME, VALID_DESCRIPTION, false, 3, 0, VALID_PRICE, spots);
 
       Iterator<EventSpot> it = section.getSpots().iterator();
       assertSame(first, it.next());
@@ -324,8 +513,7 @@ class EventSectionTest {
       spots.add(duplicate);
 
       EventSection section =
-          new EventSection(
-              VALID_NAME, VALID_DESCRIPTION, false, VALID_TOTAL_SPOTS, 0, VALID_PRICE, spots);
+          new EventSection(VALID_NAME, VALID_DESCRIPTION, false, 3, 0, VALID_PRICE, spots);
 
       assertEquals(1, section.getSpots().size());
     }
@@ -334,7 +522,8 @@ class EventSectionTest {
     @DisplayName("getSpots should return an unmodifiable view")
     void shouldReturnUnmodifiableSet() {
       EventSection section =
-          EventSection.create(VALID_NAME, VALID_DESCRIPTION, VALID_TOTAL_SPOTS, VALID_PRICE);
+          new EventSection(
+              VALID_NAME, VALID_DESCRIPTION, false, 0, 0, VALID_PRICE, new LinkedHashSet<>());
 
       EventSpot spot = EventSpot.create("A1");
       assertThrows(UnsupportedOperationException.class, () -> section.getSpots().add(spot));
@@ -370,10 +559,8 @@ class EventSectionTest {
     @Test
     @DisplayName("should not be equal when sections have different IDs")
     void shouldNotBeEqualWithDifferentIds() {
-      EventSection a =
-          EventSection.create(VALID_NAME, VALID_DESCRIPTION, VALID_TOTAL_SPOTS, VALID_PRICE);
-      EventSection b =
-          EventSection.create(VALID_NAME, VALID_DESCRIPTION, VALID_TOTAL_SPOTS, VALID_PRICE);
+      EventSection a = EventSection.create(VALID_COMMAND);
+      EventSection b = EventSection.create(VALID_COMMAND);
 
       assertNotEquals(a, b);
     }
@@ -381,8 +568,7 @@ class EventSectionTest {
     @Test
     @DisplayName("should be equal to itself")
     void shouldBeEqualToItself() {
-      EventSection section =
-          EventSection.create(VALID_NAME, VALID_DESCRIPTION, VALID_TOTAL_SPOTS, VALID_PRICE);
+      EventSection section = EventSection.create(VALID_COMMAND);
 
       assertEquals(section, section);
     }
@@ -395,8 +581,7 @@ class EventSectionTest {
     @Test
     @DisplayName("should contain the section ID, name and price")
     void shouldContainRelevantFields() {
-      EventSection section =
-          EventSection.create(VALID_NAME, VALID_DESCRIPTION, VALID_TOTAL_SPOTS, VALID_PRICE);
+      EventSection section = EventSection.create(VALID_COMMAND);
 
       assertTrue(section.toString().contains(section.getId().getValue()));
       assertTrue(section.toString().contains(VALID_NAME));

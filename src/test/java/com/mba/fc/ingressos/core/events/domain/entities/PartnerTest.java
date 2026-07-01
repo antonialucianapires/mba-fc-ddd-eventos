@@ -126,7 +126,8 @@ class PartnerTest {
   class InitEvent {
 
     private static final CreateEventCommand VALID_EVENT_COMMAND =
-        new CreateEventCommand("Show de Rock", "Um grande show", LocalDate.of(2026, 12, 31), 100, new PartnerId());
+        new CreateEventCommand(
+            "Show de Rock", "Um grande show", LocalDate.of(2026, 12, 31), 100, new PartnerId());
 
     @Test
     @DisplayName("should return an Event with fields from the command")

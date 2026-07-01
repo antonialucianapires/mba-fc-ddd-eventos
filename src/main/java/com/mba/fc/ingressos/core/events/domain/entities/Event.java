@@ -104,6 +104,105 @@ public class Event extends AggregateRoot<EventId> {
     }
   }
 
+  public Event changeName(String name) {
+    return new Event(
+        this.id,
+        name,
+        this.description,
+        this.date,
+        this.isPublished,
+        this.totalSpots.get(),
+        this.totalSpotsReserved.get(),
+        this.partnerId,
+        this.sections);
+  }
+
+  public Event changeDescription(String description) {
+    return new Event(
+        this.id,
+        this.name,
+        description,
+        this.date,
+        this.isPublished,
+        this.totalSpots.get(),
+        this.totalSpotsReserved.get(),
+        this.partnerId,
+        this.sections);
+  }
+
+  public Event changeDate(LocalDate date) {
+    return new Event(
+        this.id,
+        this.name,
+        this.description,
+        date,
+        this.isPublished,
+        this.totalSpots.get(),
+        this.totalSpotsReserved.get(),
+        this.partnerId,
+        this.sections);
+  }
+
+  public Event publishAll() {
+    Set<EventSection> publishedSections = new LinkedHashSet<>();
+    for (EventSection section : this.sections) {
+      publishedSections.add(section.publish());
+    }
+    return new Event(
+        this.id,
+        this.name,
+        this.description,
+        this.date,
+        true,
+        this.totalSpots.get(),
+        this.totalSpotsReserved.get(),
+        this.partnerId,
+        publishedSections);
+  }
+
+  public Event unpublishAll() {
+    Set<EventSection> unpublishedSections = new LinkedHashSet<>();
+    for (EventSection section : this.sections) {
+      unpublishedSections.add(section.unpublish());
+    }
+    return new Event(
+        this.id,
+        this.name,
+        this.description,
+        this.date,
+        false,
+        this.totalSpots.get(),
+        this.totalSpotsReserved.get(),
+        this.partnerId,
+        unpublishedSections);
+  }
+
+  public Event publish() {
+    return new Event(
+        this.id,
+        this.name,
+        this.description,
+        this.date,
+        true,
+        this.totalSpots.get(),
+        this.totalSpotsReserved.get(),
+        this.partnerId,
+        this.sections);
+  }
+
+  public Event unpublish() {
+    return new Event(
+        this.id,
+        this.name,
+        this.description,
+        this.date,
+        false,
+        this.totalSpots.get(),
+        this.totalSpotsReserved.get(),
+        this.partnerId,
+        this.sections);
+  }
+
   public EventId getId() {
     return id;
   }

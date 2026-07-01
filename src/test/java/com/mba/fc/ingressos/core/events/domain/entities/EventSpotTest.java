@@ -104,6 +104,154 @@ class EventSpotTest {
   }
 
   @Nested
+  @DisplayName("changeLocation")
+  class ChangeLocation {
+
+    @Test
+    @DisplayName("should return a new instance with the updated location")
+    void shouldReturnNewInstanceWithUpdatedLocation() {
+      EventSpot spot = EventSpot.create(VALID_LOCATION);
+      EventSpot changed = spot.changeLocation("B2");
+
+      assertNotSame(spot, changed);
+      assertEquals("B2", changed.getLocation());
+    }
+
+    @Test
+    @DisplayName("should preserve the same ID")
+    void shouldPreserveId() {
+      EventSpot spot = EventSpot.create(VALID_LOCATION);
+      EventSpot changed = spot.changeLocation("B2");
+
+      assertEquals(spot.getId().getValue(), changed.getId().getValue());
+    }
+
+    @Test
+    @DisplayName("should preserve isReserved and isPublished")
+    void shouldPreserveOtherFields() {
+      EventSpot spot = new EventSpot(VALID_LOCATION, true, true);
+      EventSpot changed = spot.changeLocation("B2");
+
+      assertTrue(changed.isReserved());
+      assertTrue(changed.isPublished());
+    }
+
+    @Test
+    @DisplayName("should not mutate the original instance")
+    void shouldNotMutateOriginal() {
+      EventSpot spot = EventSpot.create(VALID_LOCATION);
+      spot.changeLocation("B2");
+
+      assertEquals(VALID_LOCATION, spot.getLocation());
+    }
+  }
+
+  @Nested
+  @DisplayName("reserve")
+  class Reserve {
+
+    @Test
+    @DisplayName("should return a new instance with isReserved set to true")
+    void shouldReturnNewInstanceWithIsReservedTrue() {
+      EventSpot spot = EventSpot.create(VALID_LOCATION);
+      EventSpot reserved = spot.reserve();
+
+      assertNotSame(spot, reserved);
+      assertTrue(reserved.isReserved());
+    }
+
+    @Test
+    @DisplayName("should preserve ID, location and isPublished")
+    void shouldPreserveOtherFields() {
+      EventSpot spot = new EventSpot(VALID_LOCATION, false, true);
+      EventSpot reserved = spot.reserve();
+
+      assertEquals(spot.getId().getValue(), reserved.getId().getValue());
+      assertEquals(VALID_LOCATION, reserved.getLocation());
+      assertTrue(reserved.isPublished());
+    }
+
+    @Test
+    @DisplayName("should not mutate the original instance")
+    void shouldNotMutateOriginal() {
+      EventSpot spot = EventSpot.create(VALID_LOCATION);
+      spot.reserve();
+
+      assertFalse(spot.isReserved());
+    }
+  }
+
+  @Nested
+  @DisplayName("publish")
+  class Publish {
+
+    @Test
+    @DisplayName("should return a new instance with isPublished set to true")
+    void shouldReturnNewInstanceWithIsPublishedTrue() {
+      EventSpot spot = EventSpot.create(VALID_LOCATION);
+      EventSpot published = spot.publish();
+
+      assertNotSame(spot, published);
+      assertTrue(published.isPublished());
+    }
+
+    @Test
+    @DisplayName("should preserve ID, location and isReserved")
+    void shouldPreserveOtherFields() {
+      EventSpot spot = new EventSpot(VALID_LOCATION, true, false);
+      EventSpot published = spot.publish();
+
+      assertEquals(spot.getId().getValue(), published.getId().getValue());
+      assertEquals(VALID_LOCATION, published.getLocation());
+      assertTrue(published.isReserved());
+    }
+
+    @Test
+    @DisplayName("should not mutate the original instance")
+    void shouldNotMutateOriginal() {
+      EventSpot spot = EventSpot.create(VALID_LOCATION);
+      spot.publish();
+
+      assertFalse(spot.isPublished());
+    }
+  }
+
+  @Nested
+  @DisplayName("unpublish")
+  class Unpublish {
+
+    @Test
+    @DisplayName("should return a new instance with isPublished set to false")
+    void shouldReturnNewInstanceWithIsPublishedFalse() {
+      EventSpot spot = new EventSpot(VALID_LOCATION, false, true);
+      EventSpot unpublished = spot.unpublish();
+
+      assertNotSame(spot, unpublished);
+      assertFalse(unpublished.isPublished());
+    }
+
+    @Test
+    @DisplayName("should preserve ID, location and isReserved")
+    void shouldPreserveOtherFields() {
+      EventSpot spot = new EventSpot(VALID_LOCATION, true, true);
+      EventSpot unpublished = spot.unpublish();
+
+      assertEquals(spot.getId().getValue(), unpublished.getId().getValue());
+      assertEquals(VALID_LOCATION, unpublished.getLocation());
+      assertTrue(unpublished.isReserved());
+    }
+
+    @Test
+    @DisplayName("should not mutate the original instance")
+    void shouldNotMutateOriginal() {
+      EventSpot spot = new EventSpot(VALID_LOCATION, false, true);
+      spot.unpublish();
+
+      assertTrue(spot.isPublished());
+    }
+  }
+
+  @Nested
   @DisplayName("Equality")
   class Equality {
 
