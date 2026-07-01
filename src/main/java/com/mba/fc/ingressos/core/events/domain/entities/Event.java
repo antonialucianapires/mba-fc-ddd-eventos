@@ -4,6 +4,7 @@ import com.mba.fc.ingressos.core.common.domain.AggregateRoot;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventId;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.PartnerId;
 import com.mba.fc.ingressos.core.events.domain.commands.AddSectionCommand;
+import com.mba.fc.ingressos.core.events.domain.commands.CreateEventCommand;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -83,21 +84,16 @@ public class Event extends AggregateRoot<EventId> {
     this.sections = new LinkedHashSet<>(sections);
   }
 
-  public static Event create(
-      String name,
-      String description,
-      LocalDate date,
-      int totalSpots,
-      PartnerId partnerId) {
+  public static Event create(CreateEventCommand command) {
     return new Event(
         new EventId(),
-        name,
-        description,
-        date,
+        command.name(),
+        command.description(),
+        command.date(),
         false,
-        totalSpots,
+        command.totalSpots(),
         0,
-        partnerId,
+        command.partnerId(),
         new LinkedHashSet<>());
   }
 
