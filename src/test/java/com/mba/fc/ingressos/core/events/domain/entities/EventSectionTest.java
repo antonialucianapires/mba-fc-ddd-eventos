@@ -4,9 +4,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventSectionId;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventSpotId;
+import com.mba.fc.ingressos.core.events.domain.commands.AddSectionCommand;
 import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -179,6 +181,106 @@ class EventSectionTest {
     void shouldCreateWithEmptySpots() {
       EventSection section =
           EventSection.create(VALID_NAME, VALID_DESCRIPTION, VALID_TOTAL_SPOTS, VALID_PRICE);
+
+      assertTrue(section.getSpots().isEmpty());
+    }
+  }
+
+  @Nested
+  @DisplayName("Factory method create(AddSectionCommand)")
+  class FactoryMethodWithCommand {
+
+    private final AddSectionCommand VALID_COMMAND =
+        new AddSectionCommand(VALID_NAME, VALID_DESCRIPTION, 3, VALID_PRICE);
+
+    @Test
+    @DisplayName("should create a section with a valid UUID as ID")
+    void shouldCreateWithValidUuid() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+
+      assertNotNull(section.getId());
+      assertDoesNotThrow(() -> UUID.fromString(section.getId().getValue()));
+    }
+
+    @Test
+    @DisplayName("should create a section with isPublished set to false")
+    void shouldCreateUnpublished() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+
+      assertFalse(section.isPublished());
+    }
+
+    @Test
+    @DisplayName("should create a section with totalSpotsReserved set to zero")
+    void shouldCreateWithZeroReservedSpots() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+
+      assertEquals(0, section.getTotalSpotsReserved());
+    }
+
+    @Test
+    @DisplayName("should store fields from the command")
+    void shouldStoreCommandFields() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+
+      assertEquals(VALID_NAME, section.getName());
+      assertEquals(VALID_DESCRIPTION, section.getDescription());
+      assertEquals(3, section.getTotalSpots());
+      assertEquals(VALID_PRICE, section.getPrice());
+    }
+
+    @Test
+    @DisplayName("each call should produce a different ID")
+    void shouldGenerateDistinctIds() {
+      EventSection a = EventSection.create(VALID_COMMAND);
+      EventSection b = EventSection.create(VALID_COMMAND);
+
+      assertNotEquals(a.getId().getValue(), b.getId().getValue());
+    }
+
+    @Test
+    @DisplayName("should initialize exactly totalSpots spots")
+    void shouldInitializeExactNumberOfSpots() {
+      EventSection section = EventSection.create(new AddSectionCommand(VALID_NAME, VALID_DESCRIPTION, 5, VALID_PRICE));
+
+      assertEquals(5, section.getSpots().size());
+    }
+
+    @Test
+    @DisplayName("should initialize spots with sequential locations starting at 'Spot 1'")
+    void shouldInitializeSpotsWithSequentialLocations() {
+      EventSection section = EventSection.create(new AddSectionCommand(VALID_NAME, VALID_DESCRIPTION, 3, VALID_PRICE));
+
+      List<String> locations = section.getSpots().stream().map(EventSpot::getLocation).toList();
+      assertEquals(List.of("Spot 1", "Spot 2", "Spot 3"), locations);
+    }
+
+    @Test
+    @DisplayName("should initialize spots with isReserved and isPublished set to false")
+    void shouldInitializeSpotsUnreservedAndUnpublished() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+
+      section.getSpots().forEach(spot -> {
+        assertFalse(spot.isReserved());
+        assertFalse(spot.isPublished());
+      });
+    }
+
+    @Test
+    @DisplayName("should initialize spots in insertion order")
+    void shouldInitializeSpotsInOrder() {
+      EventSection section = EventSection.create(new AddSectionCommand(VALID_NAME, VALID_DESCRIPTION, 3, VALID_PRICE));
+
+      Iterator<EventSpot> it = section.getSpots().iterator();
+      assertEquals("Spot 1", it.next().getLocation());
+      assertEquals("Spot 2", it.next().getLocation());
+      assertEquals("Spot 3", it.next().getLocation());
+    }
+
+    @Test
+    @DisplayName("should create no spots when totalSpots is zero")
+    void shouldCreateNoSpotsWhenTotalSpotsIsZero() {
+      EventSection section = EventSection.create(new AddSectionCommand(VALID_NAME, VALID_DESCRIPTION, 0, VALID_PRICE));
 
       assertTrue(section.getSpots().isEmpty());
     }

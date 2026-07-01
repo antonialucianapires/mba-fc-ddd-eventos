@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventId;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventSectionId;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.PartnerId;
+import com.mba.fc.ingressos.core.events.domain.commands.AddSectionCommand;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Iterator;
@@ -311,6 +312,90 @@ class EventTest {
       assertThrows(UnsupportedOperationException.class, () -> event.getSections().add(section));
     }
   }
+
+  @Nested
+  @DisplayName("addSection")
+  class AddSection {
+
+    @Test
+    @DisplayName("should add a section created from the command")
+    void shouldAddSectionFromCommand() {
+      Event event =
+          Event.create(VALID_NAME, VALID_DESCRIPTION, VALID_DATE, VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
+      AddSectionCommand command =
+          new AddSectionCommand("Pista", "Seção pista", 200, new BigDecimal("50.00"));
+
+      event.addSection(command);
+
+      assertEquals(1, event.getSections().size());
+    }
+
+    @Test
+    @DisplayName("should create section with data from the command")
+    void shouldCreateSectionWithCommandData() {
+      Event event =
+          Event.create(VALID_NAME, VALID_DESCRIPTION, VALID_DATE, VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
+      AddSectionCommand command =
+          new AddSectionCommand("VIP", "Seção VIP", 50, new BigDecimal("200.00"));
+
+      event.addSection(command);
+
+      EventSection section = event.getSections().iterator().next();
+      assertEquals("VIP", section.getName());
+      assertEquals("Seção VIP", section.getDescription());
+      assertEquals(50, section.getTotalSpots());
+      assertEquals(new BigDecimal("200.00"), section.getPrice());
+      assertFalse(section.isPublished());
+    }
+
+    @Test
+    @DisplayName("should maintain insertion order across multiple addSection calls")
+    void shouldMaintainInsertionOrder() {
+      Event event =
+          Event.create(VALID_NAME, VALID_DESCRIPTION, VALID_DATE, VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
+
+      event.addSection(new AddSectionCommand("Pista", "Desc", 200, new BigDecimal("50.00")));
+      event.addSection(new AddSectionCommand("VIP", "Desc", 50, new BigDecimal("200.00")));
+      event.addSection(new AddSectionCommand("Camarote", "Desc", 20, new BigDecimal("500.00")));
+
+      Iterator<EventSection> it = event.getSections().iterator();
+      assertEquals("Pista", it.next().getName());
+      assertEquals("VIP", it.next().getName());
+      assertEquals("Camarote", it.next().getName());
+    }
+
+    @Test
+    @DisplayName("each addSection call should produce a section with a unique ID")
+    void shouldGenerateUniqueIdPerSection() {
+      Event event =
+          Event.create(VALID_NAME, VALID_DESCRIPTION, VALID_DATE, VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
+      AddSectionCommand command =
+          new AddSectionCommand("Pista", "Desc", 200, new BigDecimal("50.00"));
+
+      event.addSection(command);
+      event.addSection(command);
+
+      assertEquals(2, event.getSections().size());
+    }
+  }
+    @Test
+    @DisplayName("should update totalSpots when adding sections")
+    void shouldUpdateTotalSpotsWhenAddingSections() {
+      Event event =
+          Event.create(VALID_NAME, VALID_DESCRIPTION, VALID_DATE, VALID_TOTAL_SPOTS, VALID_PARTNER_ID);
+
+      AddSectionCommand command =
+          new AddSectionCommand("Pista", "Desc", 200, new BigDecimal("50.00"));
+
+      event.addSection(command);
+
+      assertEquals(VALID_TOTAL_SPOTS + 200, event.getTotalSpots());
+
+      event.addSection(command);
+
+      assertEquals(VALID_TOTAL_SPOTS + 400, event.getTotalSpots());
+    }
+
 
   @Nested
   @DisplayName("Equality")
