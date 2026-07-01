@@ -2,6 +2,7 @@ package com.mba.fc.ingressos.core.events.domain.entities;
 
 import com.mba.fc.ingressos.core.common.domain.Entity;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventSectionId;
+import com.mba.fc.ingressos.core.events.domain.commands.AddSectionCommand;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -84,6 +85,28 @@ public class EventSection extends Entity<EventSectionId> {
         0,
         price,
         new LinkedHashSet<>());
+  }
+
+  public static EventSection create(AddSectionCommand command) {
+    var section = new EventSection(
+            new EventSectionId(),
+            command.name(),
+            command.description(),
+            false,
+            command.totalSpots(),
+            0,
+            command.price(),
+            new LinkedHashSet<>());
+    section.initSpots();
+    return section;
+  }
+
+  private void initSpots() {
+    for (int i = 1; i <= totalSpots; i++) {
+      String location = "Spot " + i;
+      EventSpot spot = EventSpot.create(location);
+      spots.add(spot);
+    }
   }
 
   public EventSectionId getId() {
