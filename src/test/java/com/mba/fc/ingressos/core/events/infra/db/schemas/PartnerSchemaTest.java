@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 @DisplayName("PartnerSchema")
 class PartnerSchemaTest {
@@ -20,7 +21,7 @@ class PartnerSchemaTest {
     @Test
     @DisplayName("no-arg constructor should create an instance without throwing")
     void shouldCreateWithNoArgConstructor() {
-      assertDoesNotThrow((org.junit.jupiter.api.function.Executable) PartnerSchema::new);
+      assertDoesNotThrow((Executable) PartnerSchema::new);
     }
 
     @Test

@@ -5,11 +5,11 @@ import com.mba.fc.ingressos.core.events.infra.db.schemas.PartnerSchema;
 
 public class PartnerMapper {
 
-    public Partner toDomain(PartnerSchema schema) {
-        return new Partner(schema.getId(), schema.getName());
-    }
+  public Partner toDomain(PartnerSchema schema) {
+    return new Partner(schema.getId(), schema.getName());
+  }
 
-    public PartnerSchema toSchema(Partner domain) {
-        return new PartnerSchema(domain.getId().getValue(), domain.getName());
-    }
+  public PartnerSchema toSchema(Partner domain) {
+    return new PartnerSchema(domain.getId().getValue(), domain.getName());
+  }
 }
