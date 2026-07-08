@@ -3,6 +3,7 @@ package com.mba.fc.ingressos.core.events.application;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.mba.fc.ingressos.core.common.application.IUnitOfWork;
 import com.mba.fc.ingressos.core.events.domain.entities.Customer;
 import com.mba.fc.ingressos.core.events.domain.repositories.ICustomerRepository;
 import java.util.Set;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
 
 @DisplayName("CustomerService")
 class CustomerServiceTest {
@@ -18,12 +20,14 @@ class CustomerServiceTest {
   private static final String VALID_NAME = "John Doe";
 
   private ICustomerRepository customerRepository;
+  private IUnitOfWork unitOfWork;
   private CustomerService service;
 
   @BeforeEach
   void setUp() {
     customerRepository = mock(ICustomerRepository.class);
-    service = new CustomerService(customerRepository);
+    unitOfWork = mock(IUnitOfWork.class);
+    service = new CustomerService(customerRepository, unitOfWork);
   }
 
   @Nested
@@ -49,6 +53,16 @@ class CustomerServiceTest {
       Set<Customer> customers = service.list();
 
       assertTrue(customers.isEmpty());
+    }
+
+    @Test
+    @DisplayName("should not interact with the unit of work")
+    void shouldNotInteractWithUnitOfWork() {
+      when(customerRepository.findAll()).thenReturn(Set.of());
+
+      service.list();
+
+      verifyNoInteractions(unitOfWork);
     }
   }
 
@@ -88,6 +102,41 @@ class CustomerServiceTest {
       Customer created = service.create(VALID_CPF, VALID_NAME);
 
       assertSame(persisted, created);
+    }
+
+    @Test
+    @DisplayName("should commit the unit of work after adding the customer")
+    void shouldCommitUnitOfWork() {
+      when(customerRepository.add(any(Customer.class)))
+          .thenAnswer(invocation -> invocation.getArgument(0));
+
+      service.create(VALID_CPF, VALID_NAME);
+
+      verify(unitOfWork).commit();
+    }
+
+    @Test
+    @DisplayName("should commit only after the customer was added to the repository")
+    void shouldCommitAfterAddingToRepository() {
+      when(customerRepository.add(any(Customer.class)))
+          .thenAnswer(invocation -> invocation.getArgument(0));
+
+      service.create(VALID_CPF, VALID_NAME);
+
+      InOrder inOrder = inOrder(customerRepository, unitOfWork);
+      inOrder.verify(customerRepository).add(any(Customer.class));
+      inOrder.verify(unitOfWork).commit();
+    }
+
+    @Test
+    @DisplayName("should never roll back the unit of work")
+    void shouldNeverRollBackUnitOfWork() {
+      when(customerRepository.add(any(Customer.class)))
+          .thenAnswer(invocation -> invocation.getArgument(0));
+
+      service.create(VALID_CPF, VALID_NAME);
+
+      verify(unitOfWork, never()).rollback();
     }
   }
 }
