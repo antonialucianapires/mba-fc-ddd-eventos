@@ -32,6 +32,10 @@ public class Customer extends AggregateRoot<CustomerId> {
     return new Customer(UUID.randomUUID().toString(), new Cpf(cpf), name);
   }
 
+  public Customer changeName(String name) {
+    return new Customer(this.id, this.cpf, name);
+  }
+
   public CustomerId getId() {
     return id;
   }

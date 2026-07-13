@@ -1,6 +1,8 @@
 package com.mba.fc.ingressos.core.events.application;
 
 import com.mba.fc.ingressos.core.common.application.IUnitOfWork;
+import com.mba.fc.ingressos.core.common.domain.valueobjects.CustomerId;
+import com.mba.fc.ingressos.core.events.domain.commands.UpdateCustomerCommand;
 import com.mba.fc.ingressos.core.events.domain.entities.Customer;
 import com.mba.fc.ingressos.core.events.domain.repositories.ICustomerRepository;
 import java.util.Set;
@@ -24,5 +26,16 @@ public class CustomerService {
     Customer customerSaved = customerRepository.add(customer);
     unitOfWork.commit();
     return customerSaved;
+  }
+
+  public Customer update(CustomerId id, UpdateCustomerCommand command) {
+    Customer customer = customerRepository.findById(id);
+    if (customer == null) {
+      throw new IllegalArgumentException("Customer not found");
+    }
+    customer = command.name().map(customer::changeName).orElse(customer);
+    Customer customerUpdated = customerRepository.add(customer);
+    unitOfWork.commit();
+    return customerUpdated;
   }
 }

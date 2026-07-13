@@ -4,8 +4,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.mba.fc.ingressos.core.common.application.IUnitOfWork;
+import com.mba.fc.ingressos.core.common.domain.valueobjects.CustomerId;
+import com.mba.fc.ingressos.core.events.domain.commands.UpdateCustomerCommand;
 import com.mba.fc.ingressos.core.events.domain.entities.Customer;
 import com.mba.fc.ingressos.core.events.domain.repositories.ICustomerRepository;
+import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -137,6 +140,63 @@ class CustomerServiceTest {
       service.create(VALID_CPF, VALID_NAME);
 
       verify(unitOfWork, never()).rollback();
+    }
+  }
+
+  @Nested
+  @DisplayName("update(CustomerId, UpdateCustomerCommand)")
+  class Update {
+
+    @Test
+    @DisplayName("should change the name when the command has a name present")
+    void shouldChangeNameWhenPresent() {
+      Customer customer = Customer.create(VALID_CPF, VALID_NAME);
+      when(customerRepository.findById(customer.getId())).thenReturn(customer);
+      when(customerRepository.add(any(Customer.class)))
+          .thenAnswer(invocation -> invocation.getArgument(0));
+
+      Customer updated =
+          service.update(customer.getId(), new UpdateCustomerCommand(Optional.of("Jane Doe")));
+
+      assertEquals("Jane Doe", updated.getName());
+    }
+
+    @Test
+    @DisplayName("should keep the current name when the command has no name")
+    void shouldKeepNameWhenAbsent() {
+      Customer customer = Customer.create(VALID_CPF, VALID_NAME);
+      when(customerRepository.findById(customer.getId())).thenReturn(customer);
+      when(customerRepository.add(any(Customer.class)))
+          .thenAnswer(invocation -> invocation.getArgument(0));
+
+      Customer updated =
+          service.update(customer.getId(), new UpdateCustomerCommand(Optional.empty()));
+
+      assertEquals(VALID_NAME, updated.getName());
+    }
+
+    @Test
+    @DisplayName("should throw when no customer is found for the given id")
+    void shouldThrowWhenCustomerNotFound() {
+      when(customerRepository.findById(any())).thenReturn(null);
+
+      assertThrows(
+          IllegalArgumentException.class,
+          () ->
+              service.update(new CustomerId(), new UpdateCustomerCommand(Optional.of("Jane Doe"))));
+    }
+
+    @Test
+    @DisplayName("should commit the unit of work after updating the customer")
+    void shouldCommitUnitOfWork() {
+      Customer customer = Customer.create(VALID_CPF, VALID_NAME);
+      when(customerRepository.findById(customer.getId())).thenReturn(customer);
+      when(customerRepository.add(any(Customer.class)))
+          .thenAnswer(invocation -> invocation.getArgument(0));
+
+      service.update(customer.getId(), new UpdateCustomerCommand(Optional.of("Jane Doe")));
+
+      verify(unitOfWork).commit();
     }
   }
 }
