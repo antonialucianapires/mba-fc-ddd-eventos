@@ -38,4 +38,13 @@ public class CustomerService {
     unitOfWork.commit();
     return customerUpdated;
   }
+
+  public void delete(CustomerId id) {
+    Customer customer = customerRepository.findById(id);
+    if (customer == null) {
+      throw new IllegalArgumentException("Customer not found");
+    }
+    customerRepository.delete(id);
+    unitOfWork.commit();
+  }
 }

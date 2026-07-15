@@ -199,4 +199,50 @@ class CustomerServiceTest {
       verify(unitOfWork).commit();
     }
   }
+
+  @Nested
+  @DisplayName("delete(CustomerId)")
+  class Delete {
+
+    @Test
+    @DisplayName("should delete the customer from the repository")
+    void shouldDeleteCustomerFromRepository() {
+      Customer customer = Customer.create(VALID_CPF, VALID_NAME);
+      when(customerRepository.findById(customer.getId())).thenReturn(customer);
+
+      service.delete(customer.getId());
+
+      verify(customerRepository).delete(customer.getId());
+    }
+
+    @Test
+    @DisplayName("should commit the unit of work after deleting the customer")
+    void shouldCommitUnitOfWork() {
+      Customer customer = Customer.create(VALID_CPF, VALID_NAME);
+      when(customerRepository.findById(customer.getId())).thenReturn(customer);
+
+      service.delete(customer.getId());
+
+      verify(unitOfWork).commit();
+    }
+
+    @Test
+    @DisplayName("should throw when no customer is found for the given id")
+    void shouldThrowWhenCustomerNotFound() {
+      when(customerRepository.findById(any())).thenReturn(null);
+
+      assertThrows(IllegalArgumentException.class, () -> service.delete(new CustomerId()));
+    }
+
+    @Test
+    @DisplayName("should not delete or commit when the customer is not found")
+    void shouldNotDeleteOrCommitWhenCustomerNotFound() {
+      when(customerRepository.findById(any())).thenReturn(null);
+
+      assertThrows(IllegalArgumentException.class, () -> service.delete(new CustomerId()));
+
+      verify(customerRepository, never()).delete(any());
+      verifyNoInteractions(unitOfWork);
+    }
+  }
 }
