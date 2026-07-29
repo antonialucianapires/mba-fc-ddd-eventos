@@ -5,10 +5,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventSectionId;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventSpotId;
 import com.mba.fc.ingressos.core.events.domain.commands.AddSectionCommand;
+import com.mba.fc.ingressos.core.events.domain.commands.UpdateEventSectionCommand;
 import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -308,6 +310,51 @@ class EventSectionTest {
       section.changePrice(new BigDecimal("300.00"));
 
       assertEquals(VALID_PRICE, section.getPrice());
+    }
+  }
+
+  @Nested
+  @DisplayName("changeInfo")
+  class ChangeInfo {
+
+    @Test
+    @DisplayName("should change only the fields present in the command")
+    void shouldChangeOnlyFieldsPresentInCommand() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+
+      EventSection changed =
+          section.changeInfo(
+              new UpdateEventSectionCommand(Optional.of("VIP"), Optional.empty(), Optional.empty()));
+
+      assertEquals("VIP", changed.getName());
+      assertEquals(VALID_DESCRIPTION, changed.getDescription());
+      assertEquals(VALID_PRICE, changed.getPrice());
+    }
+
+    @Test
+    @DisplayName("should keep every field when the command has none present")
+    void shouldKeepFieldsWhenCommandIsEmpty() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+
+      EventSection changed =
+          section.changeInfo(
+              new UpdateEventSectionCommand(Optional.empty(), Optional.empty(), Optional.empty()));
+
+      assertEquals(VALID_NAME, changed.getName());
+      assertEquals(VALID_DESCRIPTION, changed.getDescription());
+      assertEquals(VALID_PRICE, changed.getPrice());
+    }
+
+    @Test
+    @DisplayName("should preserve the same ID")
+    void shouldPreserveId() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+
+      EventSection changed =
+          section.changeInfo(
+              new UpdateEventSectionCommand(Optional.of("VIP"), Optional.empty(), Optional.empty()));
+
+      assertEquals(section.getId(), changed.getId());
     }
   }
 

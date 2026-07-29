@@ -7,10 +7,12 @@ import com.mba.fc.ingressos.core.common.domain.valueobjects.EventSectionId;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.PartnerId;
 import com.mba.fc.ingressos.core.events.domain.commands.AddSectionCommand;
 import com.mba.fc.ingressos.core.events.domain.commands.CreateEventCommand;
+import com.mba.fc.ingressos.core.events.domain.commands.UpdateEventSectionCommand;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -523,6 +525,57 @@ class EventTest {
       event.addSection(SECTION_COMMAND);
 
       assertEquals(2, event.getSections().size());
+    }
+  }
+
+  @Nested
+  @DisplayName("updateSection")
+  class UpdateSection {
+
+    @Test
+    @DisplayName("should change only the fields present in the command")
+    void shouldChangeOnlyFieldsPresentInCommand() {
+      Event event = Event.create(VALID_COMMAND);
+      event.addSection(SECTION_COMMAND);
+      EventSection section = event.getSections().iterator().next();
+
+      event.updateSection(
+          section.getId(),
+          new UpdateEventSectionCommand(Optional.of("VIP"), Optional.empty(), Optional.empty()));
+
+      EventSection updated = event.getSections().iterator().next();
+      assertEquals("VIP", updated.getName());
+      assertEquals(section.getDescription(), updated.getDescription());
+      assertEquals(section.getPrice(), updated.getPrice());
+    }
+
+    @Test
+    @DisplayName("should keep the section id after the update")
+    void shouldKeepSectionIdAfterUpdate() {
+      Event event = Event.create(VALID_COMMAND);
+      event.addSection(SECTION_COMMAND);
+      EventSection section = event.getSections().iterator().next();
+
+      event.updateSection(
+          section.getId(),
+          new UpdateEventSectionCommand(Optional.of("VIP"), Optional.empty(), Optional.empty()));
+
+      assertEquals(1, event.getSections().size());
+      assertEquals(section.getId(), event.getSections().iterator().next().getId());
+    }
+
+    @Test
+    @DisplayName("should throw when no section is found for the given id")
+    void shouldThrowWhenSectionNotFound() {
+      Event event = Event.create(VALID_COMMAND);
+
+      assertThrows(
+          IllegalArgumentException.class,
+          () ->
+              event.updateSection(
+                  new EventSectionId(),
+                  new UpdateEventSectionCommand(
+                      Optional.of("VIP"), Optional.empty(), Optional.empty())));
     }
   }
 

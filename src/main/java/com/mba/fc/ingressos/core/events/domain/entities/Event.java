@@ -3,8 +3,10 @@ package com.mba.fc.ingressos.core.events.domain.entities;
 import com.mba.fc.ingressos.core.common.domain.AggregateRoot;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventId;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.PartnerId;
+import com.mba.fc.ingressos.core.common.domain.valueobjects.EventSectionId;
 import com.mba.fc.ingressos.core.events.domain.commands.AddSectionCommand;
 import com.mba.fc.ingressos.core.events.domain.commands.CreateEventCommand;
+import com.mba.fc.ingressos.core.events.domain.commands.UpdateEventSectionCommand;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -102,6 +104,20 @@ public class Event extends AggregateRoot<EventId> {
     if (this.sections.add(section)) {
       this.totalSpots.addAndGet(section.getTotalSpots());
     }
+  }
+
+  public void updateSection(EventSectionId sectionId, UpdateEventSectionCommand command) {
+    EventSection section = findSection(sectionId);
+    EventSection updatedSection = section.changeInfo(command);
+    this.sections.remove(section);
+    this.sections.add(updatedSection);
+  }
+
+  private EventSection findSection(EventSectionId sectionId) {
+    return sections.stream()
+        .filter(section -> section.getId().equals(sectionId))
+        .findFirst()
+        .orElseThrow(() -> new IllegalArgumentException("Section not found"));
   }
 
   public Event changeName(String name) {

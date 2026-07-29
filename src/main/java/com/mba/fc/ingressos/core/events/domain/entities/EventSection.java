@@ -3,6 +3,7 @@ package com.mba.fc.ingressos.core.events.domain.entities;
 import com.mba.fc.ingressos.core.common.domain.Entity;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventSectionId;
 import com.mba.fc.ingressos.core.events.domain.commands.AddSectionCommand;
+import com.mba.fc.ingressos.core.events.domain.commands.UpdateEventSectionCommand;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -131,6 +132,13 @@ public class EventSection extends Entity<EventSectionId> {
         this.totalSpotsReserved,
         price,
         this.spots);
+  }
+
+  public EventSection changeInfo(UpdateEventSectionCommand command) {
+    EventSection section = command.name().map(this::changeName).orElse(this);
+    section = command.description().map(section::changeDescription).orElse(section);
+    section = command.price().map(section::changePrice).orElse(section);
+    return section;
   }
 
   public EventSection publish() {
