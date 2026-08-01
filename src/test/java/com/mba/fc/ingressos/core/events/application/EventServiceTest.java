@@ -234,6 +234,90 @@ class EventServiceTest {
   }
 
   @Nested
+  @DisplayName("addSection(EventId, AddSectionCommand)")
+  class AddSection {
+
+    @Test
+    @DisplayName("should add a new section to the event")
+    void shouldAddSectionToEvent() {
+      Event event = partner.initEvent(validCommand);
+      when(eventRepository.findById(event.getId())).thenReturn(event);
+      when(eventRepository.add(any(Event.class)))
+          .thenAnswer(invocation -> invocation.getArgument(0));
+
+      Event updated =
+          service.addSection(
+              event.getId(),
+              new AddSectionCommand("Pista", "Seção pista", 3, new BigDecimal("50.00")));
+
+      assertEquals(1, updated.getSections().size());
+      EventSection addedSection = updated.getSections().iterator().next();
+      assertEquals("Pista", addedSection.getName());
+    }
+
+    @Test
+    @DisplayName("should throw when no event is found for the given id")
+    void shouldThrowWhenEventNotFound() {
+      when(eventRepository.findById(any())).thenReturn(null);
+
+      assertThrows(
+          IllegalArgumentException.class,
+          () ->
+              service.addSection(
+                  new EventId(),
+                  new AddSectionCommand("Pista", "Seção pista", 3, new BigDecimal("50.00"))));
+    }
+
+    @Test
+    @DisplayName("should not add or commit when the event is not found")
+    void shouldNotAddOrCommitWhenEventNotFound() {
+      when(eventRepository.findById(any())).thenReturn(null);
+
+      assertThrows(
+          IllegalArgumentException.class,
+          () ->
+              service.addSection(
+                  new EventId(),
+                  new AddSectionCommand("Pista", "Seção pista", 3, new BigDecimal("50.00"))));
+
+      verify(eventRepository, never()).add(any());
+      verifyNoInteractions(unitOfWork);
+    }
+
+    @Test
+    @DisplayName("should commit the unit of work after adding the section")
+    void shouldCommitUnitOfWork() {
+      Event event = partner.initEvent(validCommand);
+      when(eventRepository.findById(event.getId())).thenReturn(event);
+      when(eventRepository.add(any(Event.class)))
+          .thenAnswer(invocation -> invocation.getArgument(0));
+
+      service.addSection(
+          event.getId(),
+          new AddSectionCommand("Pista", "Seção pista", 3, new BigDecimal("50.00")));
+
+      verify(unitOfWork).commit();
+    }
+
+    @Test
+    @DisplayName("should commit only after the section was added to the repository")
+    void shouldCommitAfterAddingToRepository() {
+      Event event = partner.initEvent(validCommand);
+      when(eventRepository.findById(event.getId())).thenReturn(event);
+      when(eventRepository.add(any(Event.class)))
+          .thenAnswer(invocation -> invocation.getArgument(0));
+
+      service.addSection(
+          event.getId(),
+          new AddSectionCommand("Pista", "Seção pista", 3, new BigDecimal("50.00")));
+
+      InOrder inOrder = inOrder(eventRepository, unitOfWork);
+      inOrder.verify(eventRepository).add(any(Event.class));
+      inOrder.verify(unitOfWork).commit();
+    }
+  }
+
+  @Nested
   @DisplayName("updateSection(EventId, EventSectionId, UpdateEventSectionCommand)")
   class UpdateSection {
 

@@ -22,8 +22,8 @@ public class CustomerH2Repository implements ICustomerRepository {
   @Override
   public Customer add(Customer entity) {
     CustomerSchema schema = customerMapper.toSchema(entity);
-    entityManager.persist(schema);
-    return customerMapper.toDomain(schema);
+    CustomerSchema merged = entityManager.merge(schema);
+    return customerMapper.toDomain(merged);
   }
 
   @Override

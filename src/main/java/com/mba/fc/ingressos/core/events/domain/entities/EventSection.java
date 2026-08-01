@@ -2,6 +2,7 @@ package com.mba.fc.ingressos.core.events.domain.entities;
 
 import com.mba.fc.ingressos.core.common.domain.Entity;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventSectionId;
+import com.mba.fc.ingressos.core.common.domain.valueobjects.EventSpotId;
 import com.mba.fc.ingressos.core.events.domain.commands.AddSectionCommand;
 import com.mba.fc.ingressos.core.events.domain.commands.UpdateEventSectionCommand;
 import java.math.BigDecimal;
@@ -139,6 +140,29 @@ public class EventSection extends Entity<EventSectionId> {
     section = command.description().map(section::changeDescription).orElse(section);
     section = command.price().map(section::changePrice).orElse(section);
     return section;
+  }
+
+  public EventSection reserveSpot(EventSpotId spotId) {
+    EventSpot spot = findSpot(spotId);
+    Set<EventSpot> updatedSpots = new LinkedHashSet<>(this.spots);
+    updatedSpots.remove(spot);
+    updatedSpots.add(spot.reserve());
+    return new EventSection(
+        this.id,
+        this.name,
+        this.description,
+        this.isPublished,
+        this.totalSpots,
+        this.totalSpotsReserved + 1,
+        this.price,
+        updatedSpots);
+  }
+
+  private EventSpot findSpot(EventSpotId spotId) {
+    return spots.stream()
+        .filter(spot -> spot.getId().equals(spotId))
+        .findFirst()
+        .orElseThrow(() -> new IllegalArgumentException("Spot not found"));
   }
 
   public EventSection publish() {

@@ -22,8 +22,8 @@ public class EventH2Repository implements IEventRepository {
   @Override
   public Event add(Event entity) {
     EventSchema schema = eventMapper.toSchema(entity);
-    entityManager.persist(schema);
-    return eventMapper.toDomain(schema);
+    EventSchema merged = entityManager.merge(schema);
+    return eventMapper.toDomain(merged);
   }
 
   @Override

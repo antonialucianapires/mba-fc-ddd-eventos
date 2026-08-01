@@ -3,6 +3,7 @@ package com.mba.fc.ingressos.core.events.application;
 import com.mba.fc.ingressos.core.common.application.IUnitOfWork;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventId;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventSectionId;
+import com.mba.fc.ingressos.core.events.domain.commands.AddSectionCommand;
 import com.mba.fc.ingressos.core.events.domain.commands.CreateEventCommand;
 import com.mba.fc.ingressos.core.events.domain.commands.UpdateEventCommand;
 import com.mba.fc.ingressos.core.events.domain.commands.UpdateEventSectionCommand;
@@ -51,6 +52,17 @@ public class EventService {
     event = command.name().map(event::changeName).orElse(event);
     event = command.description().map(event::changeDescription).orElse(event);
     event = command.date().map(event::changeDate).orElse(event);
+    Event eventUpdated = eventRepository.add(event);
+    unitOfWork.commit();
+    return eventUpdated;
+  }
+
+  public Event addSection(EventId id, AddSectionCommand command) {
+    Event event = eventRepository.findById(id);
+    if (event == null) {
+      throw new IllegalArgumentException("Event not found");
+    }
+    event.addSection(command);
     Event eventUpdated = eventRepository.add(event);
     unitOfWork.commit();
     return eventUpdated;

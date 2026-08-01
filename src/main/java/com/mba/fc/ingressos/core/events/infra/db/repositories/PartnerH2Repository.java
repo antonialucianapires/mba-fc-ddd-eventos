@@ -22,8 +22,8 @@ public class PartnerH2Repository implements IPartnerRepository {
   @Override
   public Partner add(Partner entity) {
     PartnerSchema schema = partnerMapper.toSchema(entity);
-    entityManager.persist(schema);
-    return partnerMapper.toDomain(schema);
+    PartnerSchema merged = entityManager.merge(schema);
+    return partnerMapper.toDomain(merged);
   }
 
   @Override

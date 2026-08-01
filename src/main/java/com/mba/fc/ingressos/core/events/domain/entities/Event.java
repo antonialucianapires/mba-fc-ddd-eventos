@@ -4,9 +4,11 @@ import com.mba.fc.ingressos.core.common.domain.AggregateRoot;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventId;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.PartnerId;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventSectionId;
+import com.mba.fc.ingressos.core.common.domain.valueobjects.EventSpotId;
 import com.mba.fc.ingressos.core.events.domain.commands.AddSectionCommand;
 import com.mba.fc.ingressos.core.events.domain.commands.CreateEventCommand;
 import com.mba.fc.ingressos.core.events.domain.commands.UpdateEventSectionCommand;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -120,6 +122,44 @@ public class Event extends AggregateRoot<EventId> {
         .orElseThrow(() -> new IllegalArgumentException("Section not found"));
   }
 
+  public boolean allowReserveSpot(EventSectionId sectionId, EventSpotId spotId) {
+    if (!this.isPublished) {
+      return false;
+    }
+    EventSection section = findSectionOrNull(sectionId);
+    if (section == null || !section.isPublished()) {
+      return false;
+    }
+    EventSpot spot = findSpotOrNull(section, spotId);
+    return spot != null && spot.isPublished() && !spot.isReserved();
+  }
+
+  public void markSpotAsReserved(EventSectionId sectionId, EventSpotId spotId) {
+    EventSection section = findSection(sectionId);
+    EventSection updatedSection = section.reserveSpot(spotId);
+    this.sections.remove(section);
+    this.sections.add(updatedSection);
+    this.totalSpotsReserved.incrementAndGet();
+  }
+
+  public BigDecimal getSectionPrice(EventSectionId sectionId) {
+    return findSection(sectionId).getPrice();
+  }
+
+  private EventSection findSectionOrNull(EventSectionId sectionId) {
+    return sections.stream()
+        .filter(section -> section.getId().equals(sectionId))
+        .findFirst()
+        .orElse(null);
+  }
+
+  private EventSpot findSpotOrNull(EventSection section, EventSpotId spotId) {
+    return section.getSpots().stream()
+        .filter(spot -> spot.getId().equals(spotId))
+        .findFirst()
+        .orElse(null);
+  }
+
   public Event changeName(String name) {
     return new Event(
         this.id,
@@ -162,7 +202,7 @@ public class Event extends AggregateRoot<EventId> {
   public Event publishAll() {
     Set<EventSection> publishedSections = new LinkedHashSet<>();
     for (EventSection section : this.sections) {
-      publishedSections.add(section.publish());
+      publishedSections.add(section.publishAll());
     }
     return new Event(
         this.id,
@@ -179,7 +219,7 @@ public class Event extends AggregateRoot<EventId> {
   public Event unpublishAll() {
     Set<EventSection> unpublishedSections = new LinkedHashSet<>();
     for (EventSection section : this.sections) {
-      unpublishedSections.add(section.unpublish());
+      unpublishedSections.add(section.unpublishAll());
     }
     return new Event(
         this.id,

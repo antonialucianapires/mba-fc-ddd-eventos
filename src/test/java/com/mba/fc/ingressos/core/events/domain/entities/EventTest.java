@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventId;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventSectionId;
+import com.mba.fc.ingressos.core.common.domain.valueobjects.EventSpotId;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.PartnerId;
 import com.mba.fc.ingressos.core.events.domain.commands.AddSectionCommand;
 import com.mba.fc.ingressos.core.events.domain.commands.CreateEventCommand;
@@ -576,6 +577,170 @@ class EventTest {
                   new EventSectionId(),
                   new UpdateEventSectionCommand(
                       Optional.of("VIP"), Optional.empty(), Optional.empty())));
+    }
+  }
+
+  @Nested
+  @DisplayName("allowReserveSpot")
+  class AllowReserveSpot {
+
+    @Test
+    @DisplayName("should return true when event, section and spot are published and spot is free")
+    void shouldReturnTrueWhenAvailable() {
+      Event event = Event.create(VALID_COMMAND);
+      event.addSection(SECTION_COMMAND);
+      EventSection section = event.getSections().iterator().next();
+      EventSpotId spotId = section.getSpots().iterator().next().getId();
+      Event published = event.publishAll();
+
+      assertTrue(published.allowReserveSpot(section.getId(), spotId));
+    }
+
+    @Test
+    @DisplayName("should return false when the event is not published")
+    void shouldReturnFalseWhenEventNotPublished() {
+      Event event = Event.create(VALID_COMMAND);
+      event.addSection(SECTION_COMMAND);
+      EventSection section = event.getSections().iterator().next();
+      EventSpotId spotId = section.getSpots().iterator().next().getId();
+
+      assertFalse(event.allowReserveSpot(section.getId(), spotId));
+    }
+
+    @Test
+    @DisplayName("should return false when the section is not found")
+    void shouldReturnFalseWhenSectionNotFound() {
+      Event event = Event.create(VALID_COMMAND).publish();
+
+      assertFalse(event.allowReserveSpot(new EventSectionId(), new EventSpotId()));
+    }
+
+    @Test
+    @DisplayName("should return false when the section is not published")
+    void shouldReturnFalseWhenSectionNotPublished() {
+      Event event = Event.create(VALID_COMMAND);
+      event.addSection(SECTION_COMMAND);
+      EventSection section = event.getSections().iterator().next();
+      EventSpotId spotId = section.getSpots().iterator().next().getId();
+      Event published = event.publish();
+
+      assertFalse(published.allowReserveSpot(section.getId(), spotId));
+    }
+
+    @Test
+    @DisplayName("should return false when the spot is not found")
+    void shouldReturnFalseWhenSpotNotFound() {
+      Event event = Event.create(VALID_COMMAND);
+      event.addSection(SECTION_COMMAND);
+      EventSection section = event.getSections().iterator().next();
+      Event published = event.publishAll();
+
+      assertFalse(published.allowReserveSpot(section.getId(), new EventSpotId()));
+    }
+
+    @Test
+    @DisplayName("should return false when the spot is not published")
+    void shouldReturnFalseWhenSpotNotPublished() {
+      Event event = Event.create(VALID_COMMAND);
+      event.addSection(SECTION_COMMAND);
+      EventSection section = event.getSections().iterator().next();
+      EventSpotId spotId = section.getSpots().iterator().next().getId();
+      Event published = event.publish();
+
+      assertFalse(published.allowReserveSpot(section.getId(), spotId));
+    }
+
+    @Test
+    @DisplayName("should return false when the spot is already reserved")
+    void shouldReturnFalseWhenSpotAlreadyReserved() {
+      Event event = Event.create(VALID_COMMAND);
+      event.addSection(SECTION_COMMAND);
+      EventSection section = event.getSections().iterator().next();
+      EventSpotId spotId = section.getSpots().iterator().next().getId();
+      Event published = event.publishAll();
+      published.markSpotAsReserved(section.getId(), spotId);
+
+      assertFalse(published.allowReserveSpot(section.getId(), spotId));
+    }
+  }
+
+  @Nested
+  @DisplayName("markSpotAsReserved")
+  class MarkSpotAsReserved {
+
+    @Test
+    @DisplayName("should mark the given spot as reserved")
+    void shouldMarkSpotAsReserved() {
+      Event event = Event.create(VALID_COMMAND);
+      event.addSection(SECTION_COMMAND);
+      EventSection section = event.getSections().iterator().next();
+      EventSpotId spotId = section.getSpots().iterator().next().getId();
+
+      event.markSpotAsReserved(section.getId(), spotId);
+
+      EventSection updatedSection = event.getSections().iterator().next();
+      EventSpot spot =
+          updatedSection.getSpots().stream().filter(s -> s.getId().equals(spotId)).findFirst().orElseThrow();
+      assertTrue(spot.isReserved());
+    }
+
+    @Test
+    @DisplayName("should increment totalSpotsReserved")
+    void shouldIncrementTotalSpotsReserved() {
+      Event event = Event.create(VALID_COMMAND);
+      event.addSection(SECTION_COMMAND);
+      EventSection section = event.getSections().iterator().next();
+      EventSpotId spotId = section.getSpots().iterator().next().getId();
+
+      event.markSpotAsReserved(section.getId(), spotId);
+
+      assertEquals(1, event.getTotalSpotsReserved());
+    }
+
+    @Test
+    @DisplayName("should throw when no section is found for the given id")
+    void shouldThrowWhenSectionNotFound() {
+      Event event = Event.create(VALID_COMMAND);
+
+      assertThrows(
+          IllegalArgumentException.class,
+          () -> event.markSpotAsReserved(new EventSectionId(), new EventSpotId()));
+    }
+
+    @Test
+    @DisplayName("should throw when no spot is found for the given id")
+    void shouldThrowWhenSpotNotFound() {
+      Event event = Event.create(VALID_COMMAND);
+      event.addSection(SECTION_COMMAND);
+      EventSection section = event.getSections().iterator().next();
+
+      assertThrows(
+          IllegalArgumentException.class,
+          () -> event.markSpotAsReserved(section.getId(), new EventSpotId()));
+    }
+  }
+
+  @Nested
+  @DisplayName("getSectionPrice")
+  class GetSectionPrice {
+
+    @Test
+    @DisplayName("should return the price of the given section")
+    void shouldReturnSectionPrice() {
+      Event event = Event.create(VALID_COMMAND);
+      event.addSection(SECTION_COMMAND);
+      EventSection section = event.getSections().iterator().next();
+
+      assertEquals(section.getPrice(), event.getSectionPrice(section.getId()));
+    }
+
+    @Test
+    @DisplayName("should throw when no section is found for the given id")
+    void shouldThrowWhenSectionNotFound() {
+      Event event = Event.create(VALID_COMMAND);
+
+      assertThrows(
+          IllegalArgumentException.class, () -> event.getSectionPrice(new EventSectionId()));
     }
   }
 

@@ -524,6 +524,85 @@ class EventSectionTest {
   }
 
   @Nested
+  @DisplayName("reserveSpot")
+  class ReserveSpot {
+
+    @Test
+    @DisplayName("should return a new instance with the given spot marked as reserved")
+    void shouldMarkSpotAsReserved() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+      EventSpotId spotId = section.getSpots().iterator().next().getId();
+
+      EventSection reserved = section.reserveSpot(spotId);
+
+      assertNotSame(section, reserved);
+      EventSpot spot =
+          reserved.getSpots().stream().filter(s -> s.getId().equals(spotId)).findFirst().orElseThrow();
+      assertTrue(spot.isReserved());
+    }
+
+    @Test
+    @DisplayName("should increment totalSpotsReserved")
+    void shouldIncrementTotalSpotsReserved() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+      EventSpotId spotId = section.getSpots().iterator().next().getId();
+
+      EventSection reserved = section.reserveSpot(spotId);
+
+      assertEquals(1, reserved.getTotalSpotsReserved());
+    }
+
+    @Test
+    @DisplayName("should preserve ID and spot count")
+    void shouldPreserveIdAndSpotCount() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+      EventSpotId spotId = section.getSpots().iterator().next().getId();
+
+      EventSection reserved = section.reserveSpot(spotId);
+
+      assertEquals(section.getId().getValue(), reserved.getId().getValue());
+      assertEquals(section.getSpots().size(), reserved.getSpots().size());
+    }
+
+    @Test
+    @DisplayName("should not change the reservation state of other spots")
+    void shouldNotChangeOtherSpots() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+      Iterator<EventSpot> it = section.getSpots().iterator();
+      EventSpotId spotId = it.next().getId();
+      EventSpotId otherSpotId = it.next().getId();
+
+      EventSection reserved = section.reserveSpot(spotId);
+
+      EventSpot other =
+          reserved.getSpots().stream()
+              .filter(s -> s.getId().equals(otherSpotId))
+              .findFirst()
+              .orElseThrow();
+      assertFalse(other.isReserved());
+    }
+
+    @Test
+    @DisplayName("should not mutate the original instance")
+    void shouldNotMutateOriginal() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+      EventSpotId spotId = section.getSpots().iterator().next().getId();
+
+      section.reserveSpot(spotId);
+
+      section.getSpots().forEach(spot -> assertFalse(spot.isReserved()));
+    }
+
+    @Test
+    @DisplayName("should throw when no spot is found for the given id")
+    void shouldThrowWhenSpotNotFound() {
+      EventSection section = EventSection.create(VALID_COMMAND);
+
+      assertThrows(IllegalArgumentException.class, () -> section.reserveSpot(new EventSpotId()));
+    }
+  }
+
+  @Nested
   @DisplayName("Spots")
   class Spots {
 
