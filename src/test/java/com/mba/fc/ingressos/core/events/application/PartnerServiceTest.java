@@ -10,6 +10,7 @@ import com.mba.fc.ingressos.core.events.domain.entities.Partner;
 import com.mba.fc.ingressos.core.events.domain.repositories.IPartnerRepository;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -30,6 +31,10 @@ class PartnerServiceTest {
     partnerRepository = mock(IPartnerRepository.class);
     unitOfWork = mock(IUnitOfWork.class);
     service = new PartnerService(partnerRepository, unitOfWork);
+
+    doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get())
+        .when(unitOfWork)
+        .runTransaction(any());
   }
 
   @Nested
@@ -238,7 +243,7 @@ class PartnerServiceTest {
       assertThrows(IllegalArgumentException.class, () -> service.delete(new PartnerId()));
 
       verify(partnerRepository, never()).delete(any());
-      verifyNoInteractions(unitOfWork);
+      verify(unitOfWork, never()).commit();
     }
   }
 }

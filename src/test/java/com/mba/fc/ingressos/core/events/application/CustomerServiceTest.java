@@ -10,6 +10,7 @@ import com.mba.fc.ingressos.core.events.domain.entities.Customer;
 import com.mba.fc.ingressos.core.events.domain.repositories.ICustomerRepository;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -31,6 +32,10 @@ class CustomerServiceTest {
     customerRepository = mock(ICustomerRepository.class);
     unitOfWork = mock(IUnitOfWork.class);
     service = new CustomerService(customerRepository, unitOfWork);
+
+    doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get())
+        .when(unitOfWork)
+        .runTransaction(any());
   }
 
   @Nested
@@ -242,7 +247,7 @@ class CustomerServiceTest {
       assertThrows(IllegalArgumentException.class, () -> service.delete(new CustomerId()));
 
       verify(customerRepository, never()).delete(any());
-      verifyNoInteractions(unitOfWork);
+      verify(unitOfWork, never()).commit();
     }
   }
 }

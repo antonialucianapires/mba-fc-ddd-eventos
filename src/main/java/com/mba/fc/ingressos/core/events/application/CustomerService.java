@@ -22,29 +22,39 @@ public class CustomerService {
   }
 
   public Customer create(String cpf, String name) {
-    Customer customer = Customer.create(cpf, name);
-    Customer customerSaved = customerRepository.add(customer);
-    unitOfWork.commit();
-    return customerSaved;
+    return unitOfWork.runTransaction(
+        () -> {
+          Customer customer = Customer.create(cpf, name);
+          Customer customerSaved = customerRepository.add(customer);
+          unitOfWork.commit();
+          return customerSaved;
+        });
   }
 
   public Customer update(CustomerId id, UpdateCustomerCommand command) {
-    Customer customer = customerRepository.findById(id);
-    if (customer == null) {
-      throw new IllegalArgumentException("Customer not found");
-    }
-    customer = command.name().map(customer::changeName).orElse(customer);
-    Customer customerUpdated = customerRepository.add(customer);
-    unitOfWork.commit();
-    return customerUpdated;
+    return unitOfWork.runTransaction(
+        () -> {
+          Customer customer = customerRepository.findById(id);
+          if (customer == null) {
+            throw new IllegalArgumentException("Customer not found");
+          }
+          Customer customerToUpdate = command.name().map(customer::changeName).orElse(customer);
+          Customer customerUpdated = customerRepository.add(customerToUpdate);
+          unitOfWork.commit();
+          return customerUpdated;
+        });
   }
 
   public void delete(CustomerId id) {
-    Customer customer = customerRepository.findById(id);
-    if (customer == null) {
-      throw new IllegalArgumentException("Customer not found");
-    }
-    customerRepository.delete(id);
-    unitOfWork.commit();
+    unitOfWork.runTransaction(
+        () -> {
+          Customer customer = customerRepository.findById(id);
+          if (customer == null) {
+            throw new IllegalArgumentException("Customer not found");
+          }
+          customerRepository.delete(id);
+          unitOfWork.commit();
+          return null;
+        });
   }
 }

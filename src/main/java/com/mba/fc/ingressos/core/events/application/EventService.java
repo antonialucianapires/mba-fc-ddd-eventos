@@ -34,49 +34,61 @@ public class EventService {
   }
 
   public Event create(CreateEventCommand command) {
-    Partner partner = partnerRepository.findById(command.partnerId());
-    if (partner == null) {
-      throw new IllegalArgumentException("Partner not found");
-    }
-    Event event = partner.initEvent(command);
-    Event eventSaved = eventRepository.add(event);
-    unitOfWork.commit();
-    return eventSaved;
+    return unitOfWork.runTransaction(
+        () -> {
+          Partner partner = partnerRepository.findById(command.partnerId());
+          if (partner == null) {
+            throw new IllegalArgumentException("Partner not found");
+          }
+          Event event = partner.initEvent(command);
+          Event eventSaved = eventRepository.add(event);
+          unitOfWork.commit();
+          return eventSaved;
+        });
   }
 
   public Event update(EventId id, UpdateEventCommand command) {
-    Event event = eventRepository.findById(id);
-    if (event == null) {
-      throw new IllegalArgumentException("Event not found");
-    }
-    event = command.name().map(event::changeName).orElse(event);
-    event = command.description().map(event::changeDescription).orElse(event);
-    event = command.date().map(event::changeDate).orElse(event);
-    Event eventUpdated = eventRepository.add(event);
-    unitOfWork.commit();
-    return eventUpdated;
+    return unitOfWork.runTransaction(
+        () -> {
+          Event event = eventRepository.findById(id);
+          if (event == null) {
+            throw new IllegalArgumentException("Event not found");
+          }
+          event = command.name().map(event::changeName).orElse(event);
+          event = command.description().map(event::changeDescription).orElse(event);
+          event = command.date().map(event::changeDate).orElse(event);
+          Event eventUpdated = eventRepository.add(event);
+          unitOfWork.commit();
+          return eventUpdated;
+        });
   }
 
   public Event addSection(EventId id, AddSectionCommand command) {
-    Event event = eventRepository.findById(id);
-    if (event == null) {
-      throw new IllegalArgumentException("Event not found");
-    }
-    event.addSection(command);
-    Event eventUpdated = eventRepository.add(event);
-    unitOfWork.commit();
-    return eventUpdated;
+    return unitOfWork.runTransaction(
+        () -> {
+          Event event = eventRepository.findById(id);
+          if (event == null) {
+            throw new IllegalArgumentException("Event not found");
+          }
+          event.addSection(command);
+          Event eventUpdated = eventRepository.add(event);
+          unitOfWork.commit();
+          return eventUpdated;
+        });
   }
 
   public Event updateSection(EventId id, EventSectionId sectionId, UpdateEventSectionCommand command) {
-    Event event = eventRepository.findById(id);
-    if (event == null) {
-      throw new IllegalArgumentException("Event not found");
-    }
-    event.updateSection(sectionId, command);
-    Event eventUpdated = eventRepository.add(event);
-    unitOfWork.commit();
-    return eventUpdated;
+    return unitOfWork.runTransaction(
+        () -> {
+          Event event = eventRepository.findById(id);
+          if (event == null) {
+            throw new IllegalArgumentException("Event not found");
+          }
+          event.updateSection(sectionId, command);
+          Event eventUpdated = eventRepository.add(event);
+          unitOfWork.commit();
+          return eventUpdated;
+        });
   }
 
   public Set<EventSection> listSections(EventId id) {
@@ -88,11 +100,15 @@ public class EventService {
   }
 
   public void delete(EventId id) {
-    Event event = eventRepository.findById(id);
-    if (event == null) {
-      throw new IllegalArgumentException("Event not found");
-    }
-    eventRepository.delete(id);
-    unitOfWork.commit();
+    unitOfWork.runTransaction(
+        () -> {
+          Event event = eventRepository.findById(id);
+          if (event == null) {
+            throw new IllegalArgumentException("Event not found");
+          }
+          eventRepository.delete(id);
+          unitOfWork.commit();
+          return null;
+        });
   }
 }

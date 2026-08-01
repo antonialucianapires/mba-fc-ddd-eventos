@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -46,6 +47,11 @@ class EventServiceTest {
     partnerRepository = mock(IPartnerRepository.class);
     unitOfWork = mock(IUnitOfWork.class);
     service = new EventService(eventRepository, partnerRepository, unitOfWork);
+
+    doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get())
+        .when(unitOfWork)
+        .runTransaction(any());
+
     partner = Partner.create("Acme Corp");
     validCommand =
         new CreateEventCommand(
@@ -133,7 +139,7 @@ class EventServiceTest {
       assertThrows(IllegalArgumentException.class, () -> service.create(validCommand));
 
       verify(eventRepository, never()).add(any());
-      verifyNoInteractions(unitOfWork);
+      verify(unitOfWork, never()).commit();
     }
 
     @Test
@@ -281,7 +287,7 @@ class EventServiceTest {
                   new AddSectionCommand("Pista", "Seção pista", 3, new BigDecimal("50.00"))));
 
       verify(eventRepository, never()).add(any());
-      verifyNoInteractions(unitOfWork);
+      verify(unitOfWork, never()).commit();
     }
 
     @Test
@@ -480,7 +486,7 @@ class EventServiceTest {
       assertThrows(IllegalArgumentException.class, () -> service.delete(new EventId()));
 
       verify(eventRepository, never()).delete(any());
-      verifyNoInteractions(unitOfWork);
+      verify(unitOfWork, never()).commit();
     }
   }
 }

@@ -22,29 +22,39 @@ public class PartnerService {
   }
 
   public Partner create(String name) {
-    Partner partner = Partner.create(name);
-    Partner partnerSaved = partnerRepository.add(partner);
-    unitOfWork.commit();
-    return partnerSaved;
+    return unitOfWork.runTransaction(
+        () -> {
+          Partner partner = Partner.create(name);
+          Partner partnerSaved = partnerRepository.add(partner);
+          unitOfWork.commit();
+          return partnerSaved;
+        });
   }
 
   public Partner update(PartnerId id, UpdatePartnerCommand command) {
-    Partner partner = partnerRepository.findById(id);
-    if (partner == null) {
-      throw new IllegalArgumentException("Partner not found");
-    }
-    partner = command.name().map(partner::changeName).orElse(partner);
-    Partner partnerUpdated = partnerRepository.add(partner);
-    unitOfWork.commit();
-    return partnerUpdated;
+    return unitOfWork.runTransaction(
+        () -> {
+          Partner partner = partnerRepository.findById(id);
+          if (partner == null) {
+            throw new IllegalArgumentException("Partner not found");
+          }
+          Partner partnerToUpdate = command.name().map(partner::changeName).orElse(partner);
+          Partner partnerUpdated = partnerRepository.add(partnerToUpdate);
+          unitOfWork.commit();
+          return partnerUpdated;
+        });
   }
 
   public void delete(PartnerId id) {
-    Partner partner = partnerRepository.findById(id);
-    if (partner == null) {
-      throw new IllegalArgumentException("Partner not found");
-    }
-    partnerRepository.delete(id);
-    unitOfWork.commit();
+    unitOfWork.runTransaction(
+        () -> {
+          Partner partner = partnerRepository.findById(id);
+          if (partner == null) {
+            throw new IllegalArgumentException("Partner not found");
+          }
+          partnerRepository.delete(id);
+          unitOfWork.commit();
+          return null;
+        });
   }
 }
