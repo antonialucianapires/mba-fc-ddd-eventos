@@ -48,9 +48,10 @@ public class EventH2Repository implements IEventRepository {
 
   @Override
   public void delete(Uuid id) {
-    entityManager
-        .createQuery("DELETE FROM EventSchema e WHERE e.id = :id")
-        .setParameter("id", id.getValue())
-        .executeUpdate();
+    EventSchema schema = entityManager.find(EventSchema.class, id.getValue());
+    if (schema != null) {
+      entityManager.remove(schema);
+      entityManager.flush();
+    }
   }
 }
