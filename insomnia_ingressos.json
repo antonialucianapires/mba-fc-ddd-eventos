@@ -1,0 +1,297 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-08-02T00:00:00.000Z",
+  "__export_source": "insomnia.desktop.app:v8",
+  "resources": [
+    {
+      "_id": "wrk_ingressos",
+      "_type": "workspace",
+      "parentId": null,
+      "name": "MBA FC DDD - Venda de Ingressos",
+      "description": "Colecao dos endpoints da API de venda de ingressos",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_base",
+      "_type": "environment",
+      "parentId": "wrk_ingressos",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:8080",
+        "partner_id": "",
+        "customer_id": "",
+        "event_id": "",
+        "section_id": "",
+        "spot_id": "",
+        "order_id": ""
+      },
+      "dataPropertyOrder": {
+        "&": ["base_url", "partner_id", "customer_id", "event_id", "section_id", "spot_id", "order_id"]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 0
+    },
+
+    {
+      "_id": "fld_partners",
+      "_type": "request_group",
+      "parentId": "wrk_ingressos",
+      "name": "Partners",
+      "metaSortKey": 1000
+    },
+    {
+      "_id": "req_partners_list",
+      "_type": "request",
+      "parentId": "fld_partners",
+      "name": "List partners",
+      "method": "GET",
+      "url": "{{ _.base_url }}/partners",
+      "headers": [{ "name": "Accept", "value": "application/json" }],
+      "metaSortKey": 1000
+    },
+    {
+      "_id": "req_partners_create",
+      "_type": "request",
+      "parentId": "fld_partners",
+      "name": "Create partner",
+      "method": "POST",
+      "url": "{{ _.base_url }}/partners",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Acme Corp\"\n}"
+      },
+      "metaSortKey": 2000
+    },
+
+    {
+      "_id": "fld_customers",
+      "_type": "request_group",
+      "parentId": "wrk_ingressos",
+      "name": "Customers",
+      "metaSortKey": 2000
+    },
+    {
+      "_id": "req_customers_list",
+      "_type": "request",
+      "parentId": "fld_customers",
+      "name": "List customers",
+      "method": "GET",
+      "url": "{{ _.base_url }}/customers",
+      "headers": [{ "name": "Accept", "value": "application/json" }],
+      "metaSortKey": 1000
+    },
+    {
+      "_id": "req_customers_create",
+      "_type": "request",
+      "parentId": "fld_customers",
+      "name": "Create customer",
+      "method": "POST",
+      "url": "{{ _.base_url }}/customers",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"cpf\": \"52998224725\",\n  \"name\": \"John Doe\"\n}"
+      },
+      "metaSortKey": 2000
+    },
+    {
+      "_id": "req_customers_update",
+      "_type": "request",
+      "parentId": "fld_customers",
+      "name": "Update customer",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/customers/{{ _.customer_id }}",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"John Updated\"\n}"
+      },
+      "metaSortKey": 3000
+    },
+    {
+      "_id": "req_customers_delete",
+      "_type": "request",
+      "parentId": "fld_customers",
+      "name": "Delete customer",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/customers/{{ _.customer_id }}",
+      "headers": [],
+      "metaSortKey": 4000
+    },
+
+    {
+      "_id": "fld_events",
+      "_type": "request_group",
+      "parentId": "wrk_ingressos",
+      "name": "Events",
+      "metaSortKey": 3000
+    },
+    {
+      "_id": "req_events_list",
+      "_type": "request",
+      "parentId": "fld_events",
+      "name": "List events",
+      "method": "GET",
+      "url": "{{ _.base_url }}/events",
+      "headers": [{ "name": "Accept", "value": "application/json" }],
+      "metaSortKey": 1000
+    },
+    {
+      "_id": "req_events_create",
+      "_type": "request",
+      "parentId": "fld_events",
+      "name": "Create event",
+      "method": "POST",
+      "url": "{{ _.base_url }}/events",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Show de Rock\",\n  \"description\": \"Um grande show\",\n  \"date\": \"2026-12-31\",\n  \"totalSpots\": 0,\n  \"partnerId\": \"{{ _.partner_id }}\"\n}"
+      },
+      "metaSortKey": 2000
+    },
+    {
+      "_id": "req_events_update",
+      "_type": "request",
+      "parentId": "fld_events",
+      "name": "Update event",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/events/{{ _.event_id }}",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Show Atualizado\",\n  \"description\": \"Descricao atualizada\",\n  \"date\": \"2026-12-31\"\n}"
+      },
+      "metaSortKey": 3000
+    },
+    {
+      "_id": "req_events_delete",
+      "_type": "request",
+      "parentId": "fld_events",
+      "name": "Delete event",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/events/{{ _.event_id }}",
+      "headers": [],
+      "metaSortKey": 4000
+    },
+
+    {
+      "_id": "fld_sections",
+      "_type": "request_group",
+      "parentId": "wrk_ingressos",
+      "name": "Event Sections",
+      "metaSortKey": 4000
+    },
+    {
+      "_id": "req_sections_list",
+      "_type": "request",
+      "parentId": "fld_sections",
+      "name": "List sections",
+      "method": "GET",
+      "url": "{{ _.base_url }}/events/{{ _.event_id }}/sections",
+      "headers": [{ "name": "Accept", "value": "application/json" }],
+      "metaSortKey": 1000
+    },
+    {
+      "_id": "req_sections_create",
+      "_type": "request",
+      "parentId": "fld_sections",
+      "name": "Add section",
+      "method": "POST",
+      "url": "{{ _.base_url }}/events/{{ _.event_id }}/sections",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Pista\",\n  \"description\": \"Secao pista\",\n  \"totalSpots\": 3,\n  \"price\": 50.00\n}"
+      },
+      "metaSortKey": 2000
+    },
+    {
+      "_id": "req_sections_update",
+      "_type": "request",
+      "parentId": "fld_sections",
+      "name": "Update section",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/events/{{ _.event_id }}/sections/{{ _.section_id }}",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Pista Premium\",\n  \"description\": \"Secao atualizada\",\n  \"price\": 75.00\n}"
+      },
+      "metaSortKey": 3000
+    },
+
+    {
+      "_id": "fld_spots",
+      "_type": "request_group",
+      "parentId": "wrk_ingressos",
+      "name": "Event Spots",
+      "metaSortKey": 5000
+    },
+    {
+      "_id": "req_spots_list",
+      "_type": "request",
+      "parentId": "fld_spots",
+      "name": "List spots",
+      "method": "GET",
+      "url": "{{ _.base_url }}/events/{{ _.event_id }}/sections/{{ _.section_id }}/spots",
+      "headers": [{ "name": "Accept", "value": "application/json" }],
+      "metaSortKey": 1000
+    },
+
+    {
+      "_id": "fld_orders",
+      "_type": "request_group",
+      "parentId": "wrk_ingressos",
+      "name": "Orders",
+      "metaSortKey": 6000
+    },
+    {
+      "_id": "req_orders_list",
+      "_type": "request",
+      "parentId": "fld_orders",
+      "name": "List orders",
+      "method": "GET",
+      "url": "{{ _.base_url }}/orders",
+      "headers": [{ "name": "Accept", "value": "application/json" }],
+      "metaSortKey": 1000
+    },
+    {
+      "_id": "req_orders_reserve",
+      "_type": "request",
+      "parentId": "fld_orders",
+      "name": "Reserve spot (create order)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/orders",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"eventId\": \"{{ _.event_id }}\",\n  \"sectionId\": \"{{ _.section_id }}\",\n  \"spotId\": \"{{ _.spot_id }}\",\n  \"customerId\": \"{{ _.customer_id }}\",\n  \"cardToken\": \"tok_visa\"\n}"
+      },
+      "metaSortKey": 2000
+    },
+    {
+      "_id": "req_orders_pay",
+      "_type": "request",
+      "parentId": "fld_orders",
+      "name": "Pay order",
+      "method": "POST",
+      "url": "{{ _.base_url }}/orders/{{ _.order_id }}/pay",
+      "headers": [],
+      "metaSortKey": 3000
+    },
+    {
+      "_id": "req_orders_cancel",
+      "_type": "request",
+      "parentId": "fld_orders",
+      "name": "Cancel order",
+      "method": "POST",
+      "url": "{{ _.base_url }}/orders/{{ _.order_id }}/cancel",
+      "headers": [],
+      "metaSortKey": 4000
+    }
+  ]
+}
