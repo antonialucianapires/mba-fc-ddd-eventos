@@ -1,7 +1,10 @@
 package com.mba.fc.ingressos.core.events.infra.db.repositories;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
+import com.mba.fc.ingressos.core.common.application.IUnitOfWork;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.CustomerId;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventSpotId;
 import com.mba.fc.ingressos.core.events.domain.entities.SpotReservation;
@@ -37,6 +40,7 @@ class SpotReservationH2RepositoryTest {
 
   private final SpotReservationMapper spotReservationMapper = new SpotReservationMapper();
 
+  private IUnitOfWork unitOfWork;
   private SpotReservationH2Repository repository;
 
   private CustomerId customerId;
@@ -44,7 +48,8 @@ class SpotReservationH2RepositoryTest {
 
   @BeforeEach
   void setUp() {
-    repository = new SpotReservationH2Repository(entityManager, spotReservationMapper);
+    unitOfWork = mock(IUnitOfWork.class);
+    repository = new SpotReservationH2Repository(entityManager, spotReservationMapper, unitOfWork);
 
     CustomerSchema customerSchema =
         new CustomerSchema(UUID.randomUUID().toString(), "52998224725", "John Doe");
@@ -104,6 +109,16 @@ class SpotReservationH2RepositoryTest {
 
       assertNotNull(found);
       assertEquals(customerId.getValue(), found.getCustomer().getId());
+    }
+
+    @Test
+    @DisplayName("should track the given reservation on the unit of work")
+    void shouldTrackGivenReservationOnUnitOfWork() {
+      SpotReservation reservation = SpotReservation.create(spotId, customerId);
+
+      repository.add(reservation);
+
+      verify(unitOfWork).trackPersisted(reservation);
     }
 
     @Test

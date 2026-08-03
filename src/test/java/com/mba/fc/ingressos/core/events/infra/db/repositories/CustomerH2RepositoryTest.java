@@ -1,7 +1,10 @@
 package com.mba.fc.ingressos.core.events.infra.db.repositories;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
+import com.mba.fc.ingressos.core.common.application.IUnitOfWork;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.CustomerId;
 import com.mba.fc.ingressos.core.events.domain.entities.Customer;
 import com.mba.fc.ingressos.core.events.infra.db.mappers.CustomerMapper;
@@ -30,11 +33,13 @@ class CustomerH2RepositoryTest {
 
   private final CustomerMapper customerMapper = new CustomerMapper();
 
+  private IUnitOfWork unitOfWork;
   private CustomerH2Repository repository;
 
   @BeforeEach
   void setUp() {
-    repository = new CustomerH2Repository(entityManager, customerMapper);
+    unitOfWork = mock(IUnitOfWork.class);
+    repository = new CustomerH2Repository(entityManager, customerMapper, unitOfWork);
   }
 
   @Nested
@@ -68,6 +73,16 @@ class CustomerH2RepositoryTest {
       assertEquals(customer.getId().getValue(), added.getId().getValue());
       assertEquals(customer.getCpf().getValue(), added.getCpf().getValue());
       assertEquals(customer.getName(), added.getName());
+    }
+
+    @Test
+    @DisplayName("should track the given customer on the unit of work")
+    void shouldTrackGivenCustomerOnUnitOfWork() {
+      Customer customer = Customer.create(VALID_CPF, VALID_NAME);
+
+      repository.add(customer);
+
+      verify(unitOfWork).trackPersisted(customer);
     }
   }
 

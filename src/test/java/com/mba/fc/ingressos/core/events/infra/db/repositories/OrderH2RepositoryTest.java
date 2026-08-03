@@ -1,7 +1,10 @@
 package com.mba.fc.ingressos.core.events.infra.db.repositories;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
+import com.mba.fc.ingressos.core.common.application.IUnitOfWork;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.CustomerId;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventSpotId;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.OrderId;
@@ -40,6 +43,7 @@ class OrderH2RepositoryTest {
 
   private final OrderMapper orderMapper = new OrderMapper();
 
+  private IUnitOfWork unitOfWork;
   private OrderH2Repository repository;
 
   private CustomerId customerId;
@@ -47,7 +51,8 @@ class OrderH2RepositoryTest {
 
   @BeforeEach
   void setUp() {
-    repository = new OrderH2Repository(entityManager, orderMapper);
+    unitOfWork = mock(IUnitOfWork.class);
+    repository = new OrderH2Repository(entityManager, orderMapper, unitOfWork);
 
     CustomerSchema customerSchema =
         new CustomerSchema(UUID.randomUUID().toString(), "52998224725", "John Doe");
@@ -120,6 +125,16 @@ class OrderH2RepositoryTest {
 
       assertEquals(order.getId().getValue(), added.getId().getValue());
       assertEquals(OrderStatus.PAID, added.getStatus());
+    }
+
+    @Test
+    @DisplayName("should track the given order on the unit of work")
+    void shouldTrackGivenOrderOnUnitOfWork() {
+      Order order = Order.create(customerId, VALID_AMOUNT, spotId);
+
+      repository.add(order);
+
+      verify(unitOfWork).trackPersisted(order);
     }
   }
 

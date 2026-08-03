@@ -1,5 +1,6 @@
 package com.mba.fc.ingressos.core.events.infra.db.repositories;
 
+import com.mba.fc.ingressos.core.common.application.IUnitOfWork;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.Uuid;
 import com.mba.fc.ingressos.core.events.domain.entities.Partner;
 import com.mba.fc.ingressos.core.events.domain.repositories.IPartnerRepository;
@@ -13,14 +14,22 @@ public class PartnerH2Repository implements IPartnerRepository {
 
   private final EntityManager entityManager;
   private final PartnerMapper partnerMapper;
+  private final IUnitOfWork unitOfWork;
 
-  public PartnerH2Repository(EntityManager entityManager, PartnerMapper partnerMapper) {
+  public PartnerH2Repository(
+      EntityManager entityManager, PartnerMapper partnerMapper, IUnitOfWork unitOfWork) {
     this.entityManager = entityManager;
     this.partnerMapper = partnerMapper;
+    this.unitOfWork = unitOfWork;
   }
 
   @Override
   public Partner add(Partner entity) {
+    // Rastreia o objeto de domínio recebido, não o que volta do mapper: é o "entity" aqui
+    // que carrega os eventos levantados pelo caso de uso (ex: Partner.create() chamando
+    // addEvent(new PartnerCreated(...))). O objeto reconstruído a partir do schema pelo
+    // mapper, depois do merge, é uma instância nova sem nenhum evento acumulado.
+    unitOfWork.trackPersisted(entity);
     PartnerSchema schema = partnerMapper.toSchema(entity);
     PartnerSchema merged = entityManager.merge(schema);
     return partnerMapper.toDomain(merged);

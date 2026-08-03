@@ -4,12 +4,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.mba.fc.ingressos.core.common.application.IUnitOfWork;
+import com.mba.fc.ingressos.core.common.domain.DomainEventManager;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.PartnerId;
 import com.mba.fc.ingressos.core.events.domain.commands.UpdatePartnerCommand;
 import com.mba.fc.ingressos.core.events.domain.entities.Partner;
 import com.mba.fc.ingressos.core.events.domain.repositories.IPartnerRepository;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,17 +26,27 @@ class PartnerServiceTest {
 
   private IPartnerRepository partnerRepository;
   private IUnitOfWork unitOfWork;
+  private DomainEventManager domainEventManager;
   private PartnerService service;
 
   @BeforeEach
   void setUp() {
     partnerRepository = mock(IPartnerRepository.class);
     unitOfWork = mock(IUnitOfWork.class);
-    service = new PartnerService(partnerRepository, unitOfWork);
+    domainEventManager = mock(DomainEventManager.class);
+    service = new PartnerService(partnerRepository, unitOfWork, domainEventManager);
 
+    // create/update passam a usar ApplicationService.run() (start/finish/fail), não mais
+    // unitOfWork.runTransaction() diretamente — mas delete() ainda usa, então o stub continua
+    // necessário para os testes de delete().
     doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get())
         .when(unitOfWork)
         .runTransaction(any());
+
+    // finish() só chama domainEventManager.publish(...) para os agregados que
+    // drainManipulatedAggregates() devolver; por padrão (sem stub extra) a lista vem vazia,
+    // então publish nunca é chamado a menos que um teste específico configure o contrário.
+    when(domainEventManager.publish(any())).thenReturn(CompletableFuture.completedFuture(null));
   }
 
   @Nested
@@ -144,6 +156,49 @@ class PartnerServiceTest {
 
       verify(unitOfWork, never()).rollback();
     }
+
+    @Test
+    @DisplayName("should open and complete the transaction around the use case")
+    void shouldOpenAndCompleteTransaction() {
+      when(partnerRepository.add(any(Partner.class)))
+          .thenAnswer(invocation -> invocation.getArgument(0));
+
+      service.create(VALID_NAME);
+
+      InOrder inOrder = inOrder(unitOfWork);
+      inOrder.verify(unitOfWork).beginTransaction();
+      inOrder.verify(unitOfWork).commit();
+      inOrder.verify(unitOfWork).completeTransaction();
+    }
+
+    @Test
+    @DisplayName("should publish the events accumulated on the created partner before committing")
+    void shouldPublishAccumulatedEventsBeforeCommit() {
+      Partner persisted = Partner.create(VALID_NAME);
+      when(partnerRepository.add(any(Partner.class))).thenReturn(persisted);
+      // Simula o que o PartnerH2Repository real faria: rastrear o partner criado (com o
+      // PartnerCreated que Partner.create() registrou) no primeiro drain, e nada nos seguintes.
+      when(unitOfWork.drainManipulatedAggregates())
+          .thenReturn(java.util.List.of(persisted), java.util.List.of());
+
+      service.create(VALID_NAME);
+
+      InOrder inOrder = inOrder(domainEventManager, unitOfWork);
+      inOrder.verify(domainEventManager).publish(persisted);
+      inOrder.verify(unitOfWork).commit();
+    }
+
+    @Test
+    @DisplayName("should roll back the transaction and not commit when the repository fails")
+    void shouldRollBackTransactionOnFailure() {
+      when(partnerRepository.add(any(Partner.class))).thenThrow(new RuntimeException("boom"));
+
+      assertThrows(RuntimeException.class, () -> service.create(VALID_NAME));
+
+      verify(unitOfWork).rollbackTransaction();
+      verify(unitOfWork, never()).commit();
+      verify(unitOfWork, never()).completeTransaction();
+    }
   }
 
   @Nested
@@ -198,6 +253,19 @@ class PartnerServiceTest {
       service.update(partner.getId(), new UpdatePartnerCommand(Optional.of("New Name")));
 
       verify(unitOfWork).commit();
+    }
+
+    @Test
+    @DisplayName("should roll back the transaction and not commit when the partner is not found")
+    void shouldRollBackTransactionWhenPartnerNotFound() {
+      when(partnerRepository.findById(any())).thenReturn(null);
+
+      assertThrows(
+          IllegalArgumentException.class,
+          () -> service.update(new PartnerId(), new UpdatePartnerCommand(Optional.of("New Name"))));
+
+      verify(unitOfWork).rollbackTransaction();
+      verify(unitOfWork, never()).commit();
     }
   }
 

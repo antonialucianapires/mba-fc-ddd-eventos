@@ -1,7 +1,10 @@
 package com.mba.fc.ingressos.core.events.infra.db.repositories;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
+import com.mba.fc.ingressos.core.common.application.IUnitOfWork;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventId;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.PartnerId;
 import com.mba.fc.ingressos.core.events.domain.entities.Event;
@@ -35,13 +38,15 @@ class EventH2RepositoryTest {
 
   private final EventMapper eventMapper = new EventMapper();
 
+  private IUnitOfWork unitOfWork;
   private EventH2Repository repository;
 
   private PartnerId partnerId;
 
   @BeforeEach
   void setUp() {
-    repository = new EventH2Repository(entityManager, eventMapper);
+    unitOfWork = mock(IUnitOfWork.class);
+    repository = new EventH2Repository(entityManager, eventMapper, unitOfWork);
 
     PartnerSchema partnerSchema = new PartnerSchema(UUID.randomUUID().toString(), "Acme Events");
     testEntityManager.persistAndFlush(partnerSchema);
@@ -96,6 +101,25 @@ class EventH2RepositoryTest {
       assertEquals(event.getId().getValue(), added.getId().getValue());
       assertEquals(event.getName(), added.getName());
       assertEquals(event.getPartnerId().getValue(), added.getPartnerId().getValue());
+    }
+
+    @Test
+    @DisplayName("should track the given event on the unit of work")
+    void shouldTrackGivenEventOnUnitOfWork() {
+      Event event =
+          new Event(
+              VALID_NAME,
+              VALID_DESCRIPTION,
+              VALID_DATE,
+              false,
+              0,
+              0,
+              partnerId,
+              new LinkedHashSet<>());
+
+      repository.add(event);
+
+      verify(unitOfWork).trackPersisted(event);
     }
   }
 

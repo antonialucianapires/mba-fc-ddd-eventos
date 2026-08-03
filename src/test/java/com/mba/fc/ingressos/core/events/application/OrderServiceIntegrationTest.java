@@ -100,13 +100,14 @@ class OrderServiceIntegrationTest {
 
     testEntityManager.clear();
 
+    UnitOfWorkJpa unitOfWork = new UnitOfWorkJpa(entityManager, transactionManager);
     service =
         new OrderService(
-            new OrderH2Repository(entityManager, new OrderMapper()),
-            new SpotReservationH2Repository(entityManager, new SpotReservationMapper()),
-            new CustomerH2Repository(entityManager, new CustomerMapper()),
-            new EventH2Repository(entityManager, new EventMapper()),
-            new UnitOfWorkJpa(entityManager, transactionManager),
+            new OrderH2Repository(entityManager, new OrderMapper(), unitOfWork),
+            new SpotReservationH2Repository(entityManager, new SpotReservationMapper(), unitOfWork),
+            new CustomerH2Repository(entityManager, new CustomerMapper(), unitOfWork),
+            new EventH2Repository(entityManager, new EventMapper(), unitOfWork),
+            unitOfWork,
             (cardToken, amount) -> {});
   }
 

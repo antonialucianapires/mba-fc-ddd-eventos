@@ -1,6 +1,7 @@
 package com.mba.fc.ingressos.config;
 
 import com.mba.fc.ingressos.core.common.application.IUnitOfWork;
+import com.mba.fc.ingressos.core.common.domain.DomainEventManager;
 import com.mba.fc.ingressos.core.common.infra.UnitOfWorkJpa;
 import com.mba.fc.ingressos.core.events.application.CustomerService;
 import com.mba.fc.ingressos.core.events.application.EventService;
@@ -67,31 +68,40 @@ public class EventsBeanConfig {
   }
 
   @Bean
-  public IEventRepository eventRepository(EntityManager entityManager, EventMapper eventMapper) {
-    return new EventH2Repository(entityManager, eventMapper);
+  public DomainEventManager domainEventManager() {
+    return new DomainEventManager();
+  }
+
+  @Bean
+  public IEventRepository eventRepository(
+      EntityManager entityManager, EventMapper eventMapper, IUnitOfWork unitOfWork) {
+    return new EventH2Repository(entityManager, eventMapper, unitOfWork);
   }
 
   @Bean
   public IPartnerRepository partnerRepository(
-      EntityManager entityManager, PartnerMapper partnerMapper) {
-    return new PartnerH2Repository(entityManager, partnerMapper);
+      EntityManager entityManager, PartnerMapper partnerMapper, IUnitOfWork unitOfWork) {
+    return new PartnerH2Repository(entityManager, partnerMapper, unitOfWork);
   }
 
   @Bean
   public ICustomerRepository customerRepository(
-      EntityManager entityManager, CustomerMapper customerMapper) {
-    return new CustomerH2Repository(entityManager, customerMapper);
+      EntityManager entityManager, CustomerMapper customerMapper, IUnitOfWork unitOfWork) {
+    return new CustomerH2Repository(entityManager, customerMapper, unitOfWork);
   }
 
   @Bean
-  public IOrderRepository orderRepository(EntityManager entityManager, OrderMapper orderMapper) {
-    return new OrderH2Repository(entityManager, orderMapper);
+  public IOrderRepository orderRepository(
+      EntityManager entityManager, OrderMapper orderMapper, IUnitOfWork unitOfWork) {
+    return new OrderH2Repository(entityManager, orderMapper, unitOfWork);
   }
 
   @Bean
   public ISpotReservationRepository spotReservationRepository(
-      EntityManager entityManager, SpotReservationMapper spotReservationMapper) {
-    return new SpotReservationH2Repository(entityManager, spotReservationMapper);
+      EntityManager entityManager,
+      SpotReservationMapper spotReservationMapper,
+      IUnitOfWork unitOfWork) {
+    return new SpotReservationH2Repository(entityManager, spotReservationMapper, unitOfWork);
   }
 
   @Bean
@@ -109,8 +119,10 @@ public class EventsBeanConfig {
 
   @Bean
   public PartnerService partnerService(
-      IPartnerRepository partnerRepository, IUnitOfWork unitOfWork) {
-    return new PartnerService(partnerRepository, unitOfWork);
+      IPartnerRepository partnerRepository,
+      IUnitOfWork unitOfWork,
+      DomainEventManager domainEventManager) {
+    return new PartnerService(partnerRepository, unitOfWork, domainEventManager);
   }
 
   @Bean

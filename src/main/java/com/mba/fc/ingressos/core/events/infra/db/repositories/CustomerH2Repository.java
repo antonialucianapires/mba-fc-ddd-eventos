@@ -1,5 +1,6 @@
 package com.mba.fc.ingressos.core.events.infra.db.repositories;
 
+import com.mba.fc.ingressos.core.common.application.IUnitOfWork;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.Uuid;
 import com.mba.fc.ingressos.core.events.domain.entities.Customer;
 import com.mba.fc.ingressos.core.events.domain.repositories.ICustomerRepository;
@@ -13,14 +14,21 @@ public class CustomerH2Repository implements ICustomerRepository {
 
   private final EntityManager entityManager;
   private final CustomerMapper customerMapper;
+  private final IUnitOfWork unitOfWork;
 
-  public CustomerH2Repository(EntityManager entityManager, CustomerMapper customerMapper) {
+  public CustomerH2Repository(
+      EntityManager entityManager, CustomerMapper customerMapper, IUnitOfWork unitOfWork) {
     this.entityManager = entityManager;
     this.customerMapper = customerMapper;
+    this.unitOfWork = unitOfWork;
   }
 
   @Override
   public Customer add(Customer entity) {
+    // Ver o comentário equivalente em PartnerH2Repository.add(): rastreamos o "entity"
+    // recebido porque é ele quem carrega os eventos de domínio, não o objeto reconstruído
+    // pelo mapper depois do merge.
+    unitOfWork.trackPersisted(entity);
     CustomerSchema schema = customerMapper.toSchema(entity);
     CustomerSchema merged = entityManager.merge(schema);
     return customerMapper.toDomain(merged);

@@ -1,7 +1,10 @@
 package com.mba.fc.ingressos.core.events.infra.db.repositories;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
+import com.mba.fc.ingressos.core.common.application.IUnitOfWork;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.PartnerId;
 import com.mba.fc.ingressos.core.events.domain.entities.Partner;
 import com.mba.fc.ingressos.core.events.infra.db.mappers.PartnerMapper;
@@ -27,11 +30,13 @@ class PartnerH2RepositoryTest {
 
   private final PartnerMapper partnerMapper = new PartnerMapper();
 
+  private IUnitOfWork unitOfWork;
   private PartnerH2Repository repository;
 
   @BeforeEach
   void setUp() {
-    repository = new PartnerH2Repository(entityManager, partnerMapper);
+    unitOfWork = mock(IUnitOfWork.class);
+    repository = new PartnerH2Repository(entityManager, partnerMapper, unitOfWork);
   }
 
   @Nested
@@ -63,6 +68,19 @@ class PartnerH2RepositoryTest {
 
       assertEquals(partner.getId().getValue(), added.getId().getValue());
       assertEquals(partner.getName(), added.getName());
+    }
+
+    @Test
+    @DisplayName("should track the given partner (not the mapped-back one) on the unit of work")
+    void shouldTrackGivenPartnerOnUnitOfWork() {
+      Partner partner = Partner.create("Acme Events");
+
+      repository.add(partner);
+
+      // Precisa ser exatamente o "partner" recebido como parâmetro: é nele que os eventos de
+      // domínio levantados por Partner.create() (o PartnerCreated) ainda existem. O objeto
+      // devolvido por add() é reconstruído do zero pelo mapper e não carrega esses eventos.
+      verify(unitOfWork).trackPersisted(partner);
     }
   }
 
