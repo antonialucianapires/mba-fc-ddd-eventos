@@ -77,7 +77,8 @@ public class EventService {
         });
   }
 
-  public Event updateSection(EventId id, EventSectionId sectionId, UpdateEventSectionCommand command) {
+  public Event updateSection(
+      EventId id, EventSectionId sectionId, UpdateEventSectionCommand command) {
     return unitOfWork.runTransaction(
         () -> {
           Event event = eventRepository.findById(id);

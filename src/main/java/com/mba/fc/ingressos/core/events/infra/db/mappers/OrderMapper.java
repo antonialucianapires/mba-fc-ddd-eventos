@@ -19,7 +19,8 @@ public class OrderMapper {
   }
 
   public OrderSchema toSchema(Order domain) {
-    CustomerSchema customerSchema = new CustomerSchema(domain.getCustomerId().getValue(), null, null);
+    CustomerSchema customerSchema =
+        new CustomerSchema(domain.getCustomerId().getValue(), null, null);
     EventSpotSchema eventSpotSchema =
         new EventSpotSchema(domain.getEventSpotId().getValue(), null, false, false, null);
     return new OrderSchema(

@@ -59,7 +59,8 @@ class OrderControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     "{\"eventId\":\""
-                        + new com.mba.fc.ingressos.core.common.domain.valueobjects.EventId().getValue()
+                        + new com.mba.fc.ingressos.core.common.domain.valueobjects.EventId()
+                            .getValue()
                         + "\",\"sectionId\":\""
                         + new com.mba.fc.ingressos.core.common.domain.valueobjects.EventSectionId()
                             .getValue()

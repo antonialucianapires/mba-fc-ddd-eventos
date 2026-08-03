@@ -83,7 +83,9 @@ class EventSectionsControllerTest {
     String eventId = event.getId().getValue();
     String sectionId = event.getSections().iterator().next().getId().getValue();
     when(eventService.updateSection(
-            eq(new EventId(eventId)), eq(new EventSectionId(sectionId)), any(UpdateEventSectionCommand.class)))
+            eq(new EventId(eventId)),
+            eq(new EventSectionId(sectionId)),
+            any(UpdateEventSectionCommand.class)))
         .thenReturn(event);
 
     mockMvc

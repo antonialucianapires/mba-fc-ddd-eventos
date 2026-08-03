@@ -13,7 +13,9 @@ public class SpotReservationMapper {
   }
 
   public SpotReservationSchema toSchema(SpotReservation domain) {
-    CustomerSchema customerSchema = new CustomerSchema(domain.getCustomerId().getValue(), null, null);
-    return new SpotReservationSchema(domain.getId().getValue(), domain.getReservedAt(), customerSchema);
+    CustomerSchema customerSchema =
+        new CustomerSchema(domain.getCustomerId().getValue(), null, null);
+    return new SpotReservationSchema(
+        domain.getId().getValue(), domain.getReservedAt(), customerSchema);
   }
 }

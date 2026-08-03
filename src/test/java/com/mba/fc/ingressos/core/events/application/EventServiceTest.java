@@ -299,8 +299,7 @@ class EventServiceTest {
           .thenAnswer(invocation -> invocation.getArgument(0));
 
       service.addSection(
-          event.getId(),
-          new AddSectionCommand("Pista", "Seção pista", 3, new BigDecimal("50.00")));
+          event.getId(), new AddSectionCommand("Pista", "Seção pista", 3, new BigDecimal("50.00")));
 
       verify(unitOfWork).commit();
     }
@@ -314,8 +313,7 @@ class EventServiceTest {
           .thenAnswer(invocation -> invocation.getArgument(0));
 
       service.addSection(
-          event.getId(),
-          new AddSectionCommand("Pista", "Seção pista", 3, new BigDecimal("50.00")));
+          event.getId(), new AddSectionCommand("Pista", "Seção pista", 3, new BigDecimal("50.00")));
 
       InOrder inOrder = inOrder(eventRepository, unitOfWork);
       inOrder.verify(eventRepository).add(any(Event.class));
@@ -341,7 +339,8 @@ class EventServiceTest {
           service.updateSection(
               event.getId(),
               section.getId(),
-              new UpdateEventSectionCommand(Optional.of("VIP"), Optional.empty(), Optional.empty()));
+              new UpdateEventSectionCommand(
+                  Optional.of("VIP"), Optional.empty(), Optional.empty()));
 
       EventSection updatedSection = updated.getSections().iterator().next();
       assertEquals("VIP", updatedSection.getName());

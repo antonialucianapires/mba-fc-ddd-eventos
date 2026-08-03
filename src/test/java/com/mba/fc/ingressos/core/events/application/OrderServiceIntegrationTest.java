@@ -123,7 +123,8 @@ class OrderServiceIntegrationTest {
 
     testEntityManager.clear();
 
-    EventSpotSchema persistedSpot = testEntityManager.find(EventSpotSchema.class, spotId.getValue());
+    EventSpotSchema persistedSpot =
+        testEntityManager.find(EventSpotSchema.class, spotId.getValue());
     assertTrue(persistedSpot.isReserved());
 
     assertNotNull(

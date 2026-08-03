@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.mba.fc.ingressos.core.common.domain.valueobjects.PartnerId;
 import com.mba.fc.ingressos.core.events.domain.commands.CreateEventCommand;
+import com.mba.fc.ingressos.core.events.domain.domainevents.PartnerCreated;
 import java.time.LocalDate;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -55,6 +56,14 @@ class PartnerTest {
 
       assertEquals(VALID_NAME, partner.getName());
     }
+
+    @Test
+    @DisplayName("should not raise any domain event")
+    void shouldNotRaiseDomainEvents() {
+      Partner partner = new Partner(VALID_NAME);
+
+      assertTrue(partner.getEvents().isEmpty());
+    }
   }
 
   @Nested
@@ -85,6 +94,26 @@ class PartnerTest {
       Partner b = Partner.create(VALID_NAME);
 
       assertNotEquals(a.getId().getValue(), b.getId().getValue());
+    }
+
+    @Test
+    @DisplayName("should raise a single PartnerCreated domain event")
+    void shouldRaisePartnerCreatedEvent() {
+      Partner partner = Partner.create(VALID_NAME);
+
+      assertEquals(1, partner.getEvents().size());
+      assertInstanceOf(PartnerCreated.class, partner.getEvents().iterator().next());
+    }
+
+    @Test
+    @DisplayName("the raised PartnerCreated event should reference this partner's ID and name")
+    void shouldRaiseEventWithPartnerData() {
+      Partner partner = Partner.create(VALID_NAME);
+
+      PartnerCreated event = (PartnerCreated) partner.getEvents().iterator().next();
+
+      assertEquals(partner.getId().getValue(), event.getAggregateId().getValue());
+      assertEquals(VALID_NAME, event.getName());
     }
   }
 

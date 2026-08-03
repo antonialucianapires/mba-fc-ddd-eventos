@@ -101,12 +101,15 @@ public class EventsBeanConfig {
 
   @Bean
   public EventService eventService(
-      IEventRepository eventRepository, IPartnerRepository partnerRepository, IUnitOfWork unitOfWork) {
+      IEventRepository eventRepository,
+      IPartnerRepository partnerRepository,
+      IUnitOfWork unitOfWork) {
     return new EventService(eventRepository, partnerRepository, unitOfWork);
   }
 
   @Bean
-  public PartnerService partnerService(IPartnerRepository partnerRepository, IUnitOfWork unitOfWork) {
+  public PartnerService partnerService(
+      IPartnerRepository partnerRepository, IUnitOfWork unitOfWork) {
     return new PartnerService(partnerRepository, unitOfWork);
   }
 

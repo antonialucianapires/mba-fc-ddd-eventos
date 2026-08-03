@@ -30,7 +30,8 @@ class EventsControllerTest {
 
   private Event newEvent(PartnerId partnerId) {
     return Event.create(
-        new CreateEventCommand("Show de Rock", "Um grande show", LocalDate.of(2026, 12, 31), 100, partnerId));
+        new CreateEventCommand(
+            "Show de Rock", "Um grande show", LocalDate.of(2026, 12, 31), 100, partnerId));
   }
 
   @Test

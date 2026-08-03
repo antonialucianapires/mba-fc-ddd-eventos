@@ -76,7 +76,11 @@ class OrderServiceTest {
     Event event =
         Event.create(
             new CreateEventCommand(
-                "Show de Rock", "Um grande show", LocalDate.of(2026, 12, 31), 100, new PartnerId()));
+                "Show de Rock",
+                "Um grande show",
+                LocalDate.of(2026, 12, 31),
+                100,
+                new PartnerId()));
     event.addSection(new AddSectionCommand("Pista", "Seção pista", 3, VALID_AMOUNT));
     section = event.getSections().iterator().next();
     spotId = section.getSpots().iterator().next().getId();
@@ -165,7 +169,8 @@ class OrderServiceTest {
 
       assertThrows(IllegalArgumentException.class, () -> service.reserve(validCommand));
 
-      verifyNoInteractions(eventRepository, spotReservationRepository, orderRepository, paymentGateway);
+      verifyNoInteractions(
+          eventRepository, spotReservationRepository, orderRepository, paymentGateway);
       verify(unitOfWork, never()).commit();
     }
 
@@ -200,7 +205,8 @@ class OrderServiceTest {
       when(customerRepository.findById(customer.getId())).thenReturn(customer);
       when(eventRepository.findById(publishedEvent.getId())).thenReturn(publishedEvent);
       when(spotReservationRepository.findById(spotId))
-          .thenReturn(SpotReservation.create(spotId, Customer.create("11144477735", "Outro").getId()));
+          .thenReturn(
+              SpotReservation.create(spotId, Customer.create("11144477735", "Outro").getId()));
 
       assertThrows(SpotAlreadyReservedException.class, () -> service.reserve(validCommand));
 
@@ -253,7 +259,8 @@ class OrderServiceTest {
       when(customerRepository.findById(customer.getId())).thenReturn(customer);
       when(eventRepository.findById(publishedEvent.getId())).thenReturn(publishedEvent);
       when(spotReservationRepository.findById(spotId)).thenReturn(null);
-      when(orderRepository.add(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+      when(orderRepository.add(any(Order.class)))
+          .thenAnswer(invocation -> invocation.getArgument(0));
       doThrow(new PaymentFailedException("card declined"))
           .when(paymentGateway)
           .payment(anyString(), any(BigDecimal.class));
@@ -267,7 +274,8 @@ class OrderServiceTest {
       when(customerRepository.findById(customer.getId())).thenReturn(customer);
       when(eventRepository.findById(publishedEvent.getId())).thenReturn(publishedEvent);
       when(spotReservationRepository.findById(spotId)).thenReturn(null);
-      when(orderRepository.add(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+      when(orderRepository.add(any(Order.class)))
+          .thenAnswer(invocation -> invocation.getArgument(0));
       doThrow(new PaymentFailedException("card declined"))
           .when(paymentGateway)
           .payment(anyString(), any(BigDecimal.class));
@@ -284,7 +292,8 @@ class OrderServiceTest {
       when(customerRepository.findById(customer.getId())).thenReturn(customer);
       when(eventRepository.findById(publishedEvent.getId())).thenReturn(publishedEvent);
       when(spotReservationRepository.findById(spotId)).thenReturn(null);
-      when(orderRepository.add(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+      when(orderRepository.add(any(Order.class)))
+          .thenAnswer(invocation -> invocation.getArgument(0));
       doThrow(new PaymentFailedException("card declined"))
           .when(paymentGateway)
           .payment(anyString(), any(BigDecimal.class));
@@ -304,7 +313,8 @@ class OrderServiceTest {
     void shouldChangeStatusToPaid() {
       Order order = Order.create(customer.getId(), VALID_AMOUNT, spotId);
       when(orderRepository.findById(order.getId())).thenReturn(order);
-      when(orderRepository.add(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+      when(orderRepository.add(any(Order.class)))
+          .thenAnswer(invocation -> invocation.getArgument(0));
 
       Order paid = service.pay(order.getId());
 
@@ -344,7 +354,8 @@ class OrderServiceTest {
     void shouldCommitUnitOfWork() {
       Order order = Order.create(customer.getId(), VALID_AMOUNT, spotId);
       when(orderRepository.findById(order.getId())).thenReturn(order);
-      when(orderRepository.add(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+      when(orderRepository.add(any(Order.class)))
+          .thenAnswer(invocation -> invocation.getArgument(0));
 
       service.pay(order.getId());
 
@@ -361,7 +372,8 @@ class OrderServiceTest {
     void shouldChangeStatusToCanceled() {
       Order order = Order.create(customer.getId(), VALID_AMOUNT, spotId);
       when(orderRepository.findById(order.getId())).thenReturn(order);
-      when(orderRepository.add(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+      when(orderRepository.add(any(Order.class)))
+          .thenAnswer(invocation -> invocation.getArgument(0));
 
       Order canceled = service.cancel(order.getId());
 
@@ -401,7 +413,8 @@ class OrderServiceTest {
     void shouldCommitUnitOfWork() {
       Order order = Order.create(customer.getId(), VALID_AMOUNT, spotId);
       when(orderRepository.findById(order.getId())).thenReturn(order);
-      when(orderRepository.add(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+      when(orderRepository.add(any(Order.class)))
+          .thenAnswer(invocation -> invocation.getArgument(0));
 
       service.cancel(order.getId());
 

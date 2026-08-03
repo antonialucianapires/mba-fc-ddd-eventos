@@ -2,9 +2,9 @@ package com.mba.fc.ingressos.core.events.domain.entities;
 
 import com.mba.fc.ingressos.core.common.domain.AggregateRoot;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventId;
-import com.mba.fc.ingressos.core.common.domain.valueobjects.PartnerId;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventSectionId;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.EventSpotId;
+import com.mba.fc.ingressos.core.common.domain.valueobjects.PartnerId;
 import com.mba.fc.ingressos.core.events.domain.commands.AddSectionCommand;
 import com.mba.fc.ingressos.core.events.domain.commands.CreateEventCommand;
 import com.mba.fc.ingressos.core.events.domain.commands.UpdateEventSectionCommand;

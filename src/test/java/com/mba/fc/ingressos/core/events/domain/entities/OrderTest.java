@@ -23,7 +23,8 @@ class OrderTest {
     @Test
     @DisplayName("given no ID, should generate a valid UUID automatically")
     void shouldGenerateIdWhenNotProvided() {
-      Order order = new Order(new CustomerId(), VALID_AMOUNT, new EventSpotId(), OrderStatus.PENDING);
+      Order order =
+          new Order(new CustomerId(), VALID_AMOUNT, new EventSpotId(), OrderStatus.PENDING);
 
       assertNotNull(order.getId());
       assertDoesNotThrow(() -> UUID.fromString(order.getId().getValue()));
@@ -45,7 +46,8 @@ class OrderTest {
     void shouldReuseOrderId() {
       OrderId orderId = new OrderId();
       Order order =
-          new Order(orderId, new CustomerId(), VALID_AMOUNT, new EventSpotId(), OrderStatus.PENDING);
+          new Order(
+              orderId, new CustomerId(), VALID_AMOUNT, new EventSpotId(), OrderStatus.PENDING);
 
       assertSame(orderId, order.getId());
     }
@@ -203,9 +205,11 @@ class OrderTest {
     @DisplayName("should be equal when both orders share the same ID regardless of other fields")
     void shouldBeEqualWithSameId() {
       String id = UUID.randomUUID().toString();
-      Order a = new Order(id, new CustomerId(), VALID_AMOUNT, new EventSpotId(), OrderStatus.PENDING);
+      Order a =
+          new Order(id, new CustomerId(), VALID_AMOUNT, new EventSpotId(), OrderStatus.PENDING);
       Order b =
-          new Order(id, new CustomerId(), new BigDecimal("99.00"), new EventSpotId(), OrderStatus.PAID);
+          new Order(
+              id, new CustomerId(), new BigDecimal("99.00"), new EventSpotId(), OrderStatus.PAID);
 
       assertEquals(a, b);
       assertEquals(a.hashCode(), b.hashCode());

@@ -112,7 +112,8 @@ class OrderServiceConcurrencyTest {
               entityManager.persist(sectionSchema);
 
               EventSpotSchema spotSchema =
-                  new EventSpotSchema(UUID.randomUUID().toString(), "A1", false, true, sectionSchema);
+                  new EventSpotSchema(
+                      UUID.randomUUID().toString(), "A1", false, true, sectionSchema);
               entityManager.persist(spotSchema);
 
               entityManager.flush();
@@ -149,10 +150,14 @@ class OrderServiceConcurrencyTest {
       }
 
       long successes = results.stream().filter(Order.class::isInstance).count();
-      long failures = results.stream().filter(SpotAlreadyReservedException.class::isInstance).count();
+      long failures =
+          results.stream().filter(SpotAlreadyReservedException.class::isInstance).count();
 
       assertEquals(1, successes, "exactly one reservation should succeed: " + results);
-      assertEquals(1, failures, "the other attempt should fail with SpotAlreadyReservedException: " + results);
+      assertEquals(
+          1,
+          failures,
+          "the other attempt should fail with SpotAlreadyReservedException: " + results);
     } finally {
       executor.shutdown();
     }
@@ -165,18 +170,22 @@ class OrderServiceConcurrencyTest {
                       .createQuery(
                           "SELECT r FROM SpotReservationSchema r", SpotReservationSchema.class)
                       .getResultList();
-              assertEquals(1, reservations.size(), "exactly one spot reservation should be persisted");
+              assertEquals(
+                  1, reservations.size(), "exactly one spot reservation should be persisted");
 
               List<OrderSchema> orders =
                   entityManager
                       .createQuery("SELECT o FROM OrderSchema o", OrderSchema.class)
                       .getResultList();
               assertEquals(
-                  1, orders.size(), "exactly one order should be persisted for the winning attempt");
+                  1,
+                  orders.size(),
+                  "exactly one order should be persisted for the winning attempt");
             });
   }
 
-  private Object attemptReserve(CustomerId customerId, String cardToken, CountDownLatch startLatch) {
+  private Object attemptReserve(
+      CustomerId customerId, String cardToken, CountDownLatch startLatch) {
     OrderService service =
         new OrderService(
             new OrderH2Repository(entityManager, new OrderMapper()),
@@ -186,7 +195,8 @@ class OrderServiceConcurrencyTest {
             new UnitOfWorkJpa(entityManager, transactionManager),
             (token, amount) -> {});
 
-    ReserveSpotCommand command = new ReserveSpotCommand(eventId, sectionId, spotId, customerId, cardToken);
+    ReserveSpotCommand command =
+        new ReserveSpotCommand(eventId, sectionId, spotId, customerId, cardToken);
 
     try {
       startLatch.await();

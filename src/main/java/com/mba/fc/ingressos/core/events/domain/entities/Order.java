@@ -63,8 +63,7 @@ public class Order extends AggregateRoot<OrderId> {
     if (this.status != OrderStatus.PENDING) {
       throw new IllegalStateException("Only a pending order can be canceled");
     }
-    return new Order(
-        this.id, this.customerId, this.amount, this.eventSpotId, OrderStatus.CANCELED);
+    return new Order(this.id, this.customerId, this.amount, this.eventSpotId, OrderStatus.CANCELED);
   }
 
   public OrderId getId() {

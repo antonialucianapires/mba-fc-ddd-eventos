@@ -324,7 +324,8 @@ class EventSectionTest {
 
       EventSection changed =
           section.changeInfo(
-              new UpdateEventSectionCommand(Optional.of("VIP"), Optional.empty(), Optional.empty()));
+              new UpdateEventSectionCommand(
+                  Optional.of("VIP"), Optional.empty(), Optional.empty()));
 
       assertEquals("VIP", changed.getName());
       assertEquals(VALID_DESCRIPTION, changed.getDescription());
@@ -352,7 +353,8 @@ class EventSectionTest {
 
       EventSection changed =
           section.changeInfo(
-              new UpdateEventSectionCommand(Optional.of("VIP"), Optional.empty(), Optional.empty()));
+              new UpdateEventSectionCommand(
+                  Optional.of("VIP"), Optional.empty(), Optional.empty()));
 
       assertEquals(section.getId(), changed.getId());
     }
@@ -537,7 +539,10 @@ class EventSectionTest {
 
       assertNotSame(section, reserved);
       EventSpot spot =
-          reserved.getSpots().stream().filter(s -> s.getId().equals(spotId)).findFirst().orElseThrow();
+          reserved.getSpots().stream()
+              .filter(s -> s.getId().equals(spotId))
+              .findFirst()
+              .orElseThrow();
       assertTrue(spot.isReserved());
     }
 

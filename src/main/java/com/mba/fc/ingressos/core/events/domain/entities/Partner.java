@@ -3,6 +3,7 @@ package com.mba.fc.ingressos.core.events.domain.entities;
 import com.mba.fc.ingressos.core.common.domain.AggregateRoot;
 import com.mba.fc.ingressos.core.common.domain.valueobjects.PartnerId;
 import com.mba.fc.ingressos.core.events.domain.commands.CreateEventCommand;
+import com.mba.fc.ingressos.core.events.domain.domainevents.PartnerCreated;
 
 public class Partner extends AggregateRoot<PartnerId> {
 
@@ -28,7 +29,9 @@ public class Partner extends AggregateRoot<PartnerId> {
   }
 
   public static Partner create(String name) {
-    return new Partner(new PartnerId(), name);
+    var partner = new Partner(new PartnerId(), name);
+    partner.addEvent(new PartnerCreated(partner.getId(), partner.getName()));
+    return partner;
   }
 
   public Partner changeName(String name) {

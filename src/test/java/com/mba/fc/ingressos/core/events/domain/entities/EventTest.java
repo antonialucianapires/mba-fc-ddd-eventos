@@ -680,7 +680,10 @@ class EventTest {
 
       EventSection updatedSection = event.getSections().iterator().next();
       EventSpot spot =
-          updatedSection.getSpots().stream().filter(s -> s.getId().equals(spotId)).findFirst().orElseThrow();
+          updatedSection.getSpots().stream()
+              .filter(s -> s.getId().equals(spotId))
+              .findFirst()
+              .orElseThrow();
       assertTrue(spot.isReserved());
     }
 
